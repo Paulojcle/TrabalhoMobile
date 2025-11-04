@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # hotel_app
 
 A new Flutter project.
@@ -18,3 +19,6 @@ samples, guidance on mobile development, and a full API reference.
 =======
 # TrabalhoMobile
 >>>>>>> a701f34379840e1eae9d370ce797f7020e3c366e
+=======
+
+>>>>>>> 8d995780374e6d679945b708ffd31da7ff36cb71
