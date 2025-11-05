@@ -3,6 +3,7 @@ import 'dart:async';
 import 'main_screen.dart';
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({Key? key}) : super(key: key); 
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
