@@ -51,6 +51,7 @@ class ConfirmacaoReserva extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
+                      fontWeight: FontWeight.bold
                     ),
                   ),
                 ),
