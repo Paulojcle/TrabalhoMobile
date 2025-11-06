@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
 
-class CadastroPage extends StatelessWidget {
+class CadastroPage extends StatefulWidget {
   const CadastroPage({super.key});
+
+  @override
+  State<CadastroPage> createState() => _CadastroPageState();
+}
+
+class _CadastroPageState extends State<CadastroPage> {
+  bool _obscureSenha = true;
+  bool _obscureConfirmarSenha = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        // Setinha de voltar
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
         elevation: 0,
-        backgroundColor: const Color(0xFFFFFFFF), // AppBar 
+        backgroundColor: const Color(0xFFFFFFFF),
         foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-        
       ),
-      // Scroll para quando os campos ocuparem mais que a tela
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.only(left: 40, right: 40),
@@ -27,12 +31,11 @@ class CadastroPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 10),
-              // Título centralizado
               const Center(
                 child: Text(
                   'Bem vindo ao\nSleepWell!',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center
+                  textAlign: TextAlign.center,
                 ),
               ),
               const SizedBox(height: 40),
@@ -43,20 +46,7 @@ class CadastroPage extends StatelessWidget {
                 child: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               TextField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)), // borda padrão
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)), // borda quando não está focado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 0, 30, 54)), // borda quando o campo está focado
-                  ),
-                ),
+                decoration: _inputDecoration(),
               ),
               const SizedBox(height: 30),
 
@@ -66,20 +56,7 @@ class CadastroPage extends StatelessWidget {
                 child: Text('Sobrenome', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               TextField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)), // borda padrão
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)), // borda quando não está focado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 0, 30, 54)), // borda quando o campo está focado
-                  ),
-                ),
+                decoration: _inputDecoration(),
               ),
               const SizedBox(height: 30),
 
@@ -89,20 +66,8 @@ class CadastroPage extends StatelessWidget {
                 child: Text('Email', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               TextField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)), // borda padrão
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)), // borda quando não está focado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 0, 30, 54)), // borda quando o campo está focado
-                  ),
-                ),
+                decoration: _inputDecoration(),
+                keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 30),
 
@@ -112,20 +77,8 @@ class CadastroPage extends StatelessWidget {
                 child: Text('Confirmar Email', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               TextField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)), // borda padrão
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)), // borda quando não está focado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 0, 30, 54)), // borda quando o campo está focado
-                  ),
-                ),
+                decoration: _inputDecoration(),
+                keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 30),
 
@@ -135,19 +88,19 @@ class CadastroPage extends StatelessWidget {
                 child: Text('Senha', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               TextField(
-                obscureText: true, // oculta a senha
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)), // borda padrão
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)), // borda quando não está focado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 0, 30, 54)), // borda quando o campo está focado
+                obscureText: _obscureSenha,
+                decoration: _inputDecoration().copyWith(
+                  suffixIcon: IconButton(
+                    padding: const EdgeInsets.only(right: 20),
+                    icon: Icon(
+                      _obscureSenha ? Icons.visibility_off : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureSenha = !_obscureSenha;
+                      });
+                    },
                   ),
                 ),
               ),
@@ -159,19 +112,19 @@ class CadastroPage extends StatelessWidget {
                 child: Text('Confirmar Senha', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)), // borda padrão
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)), // borda quando não está focado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: const BorderSide(color: Color.fromARGB(255, 0, 30, 54)), // borda quando o campo está focado
+                obscureText: _obscureConfirmarSenha,
+                decoration: _inputDecoration().copyWith(
+                  suffixIcon: IconButton(
+                    padding: const EdgeInsets.only(right: 20),
+                    icon: Icon(
+                      _obscureConfirmarSenha ? Icons.visibility_off : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureConfirmarSenha = !_obscureConfirmarSenha;
+                      });
+                    },
                   ),
                 ),
               ),
@@ -182,22 +135,45 @@ class CadastroPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     // Aqui você vai para a tela de sucesso
-                    // Ex: Navigator.push(context, MaterialPageRoute(builder: (context) => SucessoPage()));
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 25, 44, 80), // azul escuro
-                    minimumSize: const Size.fromHeight(60), // altura do botão
+                    backgroundColor: const Color.fromARGB(255, 25, 44, 80),
+                    minimumSize: const Size.fromHeight(60),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50), // borda arredondada igual aos TextFields
+                      borderRadius: BorderRadius.circular(50),
                     ),
                   ),
-                  child: const Text('Cadastrar', style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),),
+                  child: const Text(
+                    'Cadastrar',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // --- Função para estilizar todos os campos ---
+  InputDecoration _inputDecoration() {
+    return InputDecoration(
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(50),
+        borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(50),
+        borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(50),
+        borderSide: const BorderSide(color: Color.fromARGB(255, 0, 30, 54)),
       ),
     );
   }
