@@ -1,6 +1,5 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-# hotel_app
+# Hotel_app
+
 
 A new Flutter project.
 
