@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:app_hotel/pages/confirmation_reserva.dart';
+import 'package:hotel_app/pages/home_page.dart';
+import 'pages/confirmation_reserva.dart';
+import 'pages/profile.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'servicos/auth_guard.dart';
+
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -12,13 +17,18 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = const [
-    Center(child: Text('Página Início')),
-    ConfirmacaoReserva(),
-    Center(child: Text('Página Configurações')),
-    Center(child: Text('Página Perfil')),
+    HomePage(), /* MENÚ: PÁGINA INICIAL */
+    ConfirmacaoReserva(),   /* MENÚ: QUARTOS */
+    ProfilePage(),    /* MENÚ: CONFIGURAÇÕES */
+    Center(child: Text('Página Perfil')),   /* MENÚ: PERFIL (caso não logado, redirecionar para LOGIN) */
   ];
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(int index) async {
+    if (index == 3) {
+      bool permitido = await requireLogin(context);
+      if (!permitido) return;
+    }
+
     setState(() {
       _selectedIndex = index;
     });
