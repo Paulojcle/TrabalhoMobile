@@ -4,7 +4,7 @@ import 'pages/confirmation_reserva.dart';
 import 'pages/profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'servicos/auth_guard.dart';
-
+import 'pages/configuration_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -17,14 +17,21 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = const [
-    HomePage(), /* MENÚ: PÁGINA INICIAL */
-    ConfirmacaoReserva(),   /* MENÚ: QUARTOS */
-    ProfilePage(),    /* MENÚ: CONFIGURAÇÕES */
-    Center(child: Text('Página Perfil')),   /* MENÚ: PERFIL (caso não logado, redirecionar para LOGIN) */
+    HomePage(),
+    /* MENÚ: PÁGINA INICIAL */
+    ConfirmacaoReserva(),
+    /* MENÚ: QUARTOS */
+    ConfigurationPage(),
+    /* MENÚ: CONFIGURAÇÕES */
+    ProfilePage(),
+    /* MENÚ: PERFIL DO USUÁRIO */
+    Center(
+      child: Text('Página Perfil'),
+    ) /* MENÚ: PERFIL (caso não logado, redirecionar para LOGIN) */,
   ];
 
   void _onItemTapped(int index) async {
-    if (index == 3) {
+    if (index == 4) {
       bool permitido = await requireLogin(context);
       if (!permitido) return;
     }
@@ -33,6 +40,7 @@ class _MainScreenState extends State<MainScreen> {
       _selectedIndex = index;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,22 +56,10 @@ class _MainScreenState extends State<MainScreen> {
         selectedItemColor: Color(0xFF192C50),
         unselectedItemColor: Color(0xFFC1C1C1),
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Início',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.hotel),
-            label: 'Quartos',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Config.',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
+          BottomNavigationBarItem(icon: Icon(Icons.hotel), label: 'Quartos'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Config.'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
         ],
       ),
     );
