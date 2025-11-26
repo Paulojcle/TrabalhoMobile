@@ -21,7 +21,7 @@ class _MainScreenState extends State<MainScreen> {
     HomePage(), /* MENÚ: PÁGINA INICIAL */
     ConfirmacaoReserva(),   /* MENÚ: QUARTOS */
     ProfilePage(),    /* MENÚ: CONFIGURAÇÕES */
-    Center(child: Text('Página Perfil')),   /* MENÚ: PERFIL (caso não logado, redirecionar para LOGIN) */
+    Center(child: Text('Página Perfil'),),   /* MENÚ: PERFIL (caso não logado, redirecionar para LOGIN) */
   ];
 
   @override

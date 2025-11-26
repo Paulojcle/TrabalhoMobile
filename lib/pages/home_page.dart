@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hotel_app/pages/detalhes_quarto.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -8,16 +9,6 @@ class HomePage extends StatelessWidget {
     return Stack(
       children: [
         Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 2,
-            centerTitle: true,
-            title: Image.asset(
-              'assets/logo.png',
-              height: 40,
-            ),
-          ),
-
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -27,7 +18,7 @@ class HomePage extends StatelessWidget {
                 Container(
                   height: 70,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                  margin: const EdgeInsets.only(bottom: 20),
+                  margin: const EdgeInsets.only(top: 40, bottom: 20), // Aumentei a margem superior para 40
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
@@ -40,7 +31,6 @@ class HomePage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  //palavra "filtros"
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -56,7 +46,6 @@ class HomePage extends StatelessWidget {
                         onTap: () {
                           print('Botão de filtros clicado');
                         },
-                        //asset filtro
                         child: Image.asset(
                           'assets/filtro.png',
                           height: 28,
@@ -67,6 +56,7 @@ class HomePage extends StatelessWidget {
                     ],
                   ),
                 ),
+
 
                 // container de anúncio
                 Container(
@@ -199,10 +189,15 @@ class HomePage extends StatelessWidget {
                                 ),
                                 ElevatedButton(
                                   onPressed: () {
-                                    print('Botão Ver clicado');
+                                    Navigator.push(
+                                      context, 
+                                      MaterialPageRoute(
+                                        builder: (context) => DetalhesQuartoPage(),
+                                      )
+                                    );
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue[900],
+                                    backgroundColor: Color(0xFF0B2A4A),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -225,52 +220,6 @@ class HomePage extends StatelessWidget {
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        // menu inferior fixo
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 6,
-                  offset: Offset(0, -2),
-                ),
-              ],
-            ),
-            child: BottomNavigationBar(
-              currentIndex: 0,
-              type: BottomNavigationBarType.fixed,
-              backgroundColor: Colors.white,
-              selectedItemColor: Colors.blue[900],
-              unselectedItemColor: Colors.grey,
-              showUnselectedLabels: true,
-              onTap: (index) {
-                print('Item $index clicado');
-              },
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: 'Início',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.bed),
-                  label: 'Quartos',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.settings),
-                  label: 'Configurações',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person),
-                  label: 'Perfil',
                 ),
               ],
             ),
