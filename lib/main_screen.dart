@@ -18,17 +18,10 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = const [
-    HomePage(),
-    /* MENÚ: PÁGINA INICIAL */
-    ConfirmacaoReserva(),
-    /* MENÚ: QUARTOS */
-    ConfigurationPage(),
-    /* MENÚ: CONFIGURAÇÕES */
-    ProfilePage(),
-    /* MENÚ: PERFIL DO USUÁRIO */
-    Center(
-      child: Text('Página Perfil'),
-    ) /* MENÚ: PERFIL (caso não logado, redirecionar para LOGIN) */,
+    HomePage(), /* MENÚ: PÁGINA INICIAL */
+    ConfirmacaoReserva(),   /* MENÚ: QUARTOS */
+    ProfilePage(),    /* MENÚ: CONFIGURAÇÕES */
+    Center(child: Text('Página Perfil')),   /* MENÚ: PERFIL (caso não logado, redirecionar para LOGIN) */
   ];
 
   @override

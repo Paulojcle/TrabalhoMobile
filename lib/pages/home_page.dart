@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hotel_app/pages/detalhes_quarto.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -8,6 +9,7 @@ class HomePage extends StatelessWidget {
     return Stack(
       children: [
         Scaffold(
+
           appBar: AppBar(
             backgroundColor: Colors.white,
             elevation: 2,
@@ -23,11 +25,16 @@ class HomePage extends StatelessWidget {
                 // container de filtros
                 Container(
                   height: 70,
+
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  margin: const EdgeInsets.only(top: 40, bottom: 20), // Aumentei a margem superior para 40
+
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 20,
                   ),
                   margin: const EdgeInsets.only(bottom: 20),
+
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
@@ -40,7 +47,6 @@ class HomePage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  //palavra "filtros"
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -53,7 +59,6 @@ class HomePage extends StatelessWidget {
                         onTap: () {
                           print('Botão de filtros clicado');
                         },
-                        //asset filtro
                         child: Image.asset(
                           'assets/filtro.png',
                           height: 28,
@@ -64,6 +69,7 @@ class HomePage extends StatelessWidget {
                     ],
                   ),
                 ),
+
 
                 // container de anúncio
                 Container(
@@ -213,10 +219,15 @@ class HomePage extends StatelessWidget {
                                 ),
                                 ElevatedButton(
                                   onPressed: () {
-                                    print('Botão Ver clicado');
+                                    Navigator.push(
+                                      context, 
+                                      MaterialPageRoute(
+                                        builder: (context) => DetalhesQuartoPage(),
+                                      )
+                                    );
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue[900],
+                                    backgroundColor: Color(0xFF0B2A4A),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -242,8 +253,8 @@ class HomePage extends StatelessWidget {
             ),
           ),
         ),
-
         // menu inferior fixo
+
       ],
     );
   }
