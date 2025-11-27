@@ -9,7 +9,7 @@ class HomePage extends StatelessWidget {
     return Stack(
       children: [
         Scaffold(
-
+          backgroundColor: const Color(0xFFFFFFFFF),
           appBar: AppBar(
             backgroundColor: Colors.white,
             elevation: 2,
@@ -28,12 +28,6 @@ class HomePage extends StatelessWidget {
 
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   margin: const EdgeInsets.only(top: 40, bottom: 20), // Aumentei a margem superior para 40
-
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 20,
-                  ),
-                  margin: const EdgeInsets.only(bottom: 20),
 
                   decoration: BoxDecoration(
                     color: Colors.white,

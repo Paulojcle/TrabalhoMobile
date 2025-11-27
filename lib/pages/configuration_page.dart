@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../servicos/auth_service.dart';
 
 class ConfigurationPage extends StatefulWidget {
   const ConfigurationPage({super.key});
@@ -11,165 +13,54 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
   String selectedLanguage = 'pt';
   bool soundEffects = true;
   bool darkMode = false;
+  
+  // Variável de estado para controlar a exibição dos botões
+  bool _isLoggedIn = false; 
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        leadingWidth: 70,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    blurRadius: 6,
-                    offset: const Offset(2, 2),
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.arrow_back, color: Colors.black),
-            ),
-          ),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(10),
-        children: [
-          const SizedBox(height: 10),
+  void initState() {
+    super.initState();
+    _checkLoginStatus(); 
+  }
 
-          // ========= ÍCONE CENTRAL =========
-          Center(
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(),
-                  child: const Icon(
-                    Icons.settings,
-                    size: 40,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  "Configurações",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
+  // Verifica o estado de login do Firebase e atualiza o widget
+  void _checkLoginStatus() {
+    final user = FirebaseAuth.instance.currentUser;
+    setState(() {
+      _isLoggedIn = user != null;
+    });
+  }
 
-          const SizedBox(height: 30),
-
-          // ========= IDIOMA =========
-          _buildCard(
-            title: "Idioma",
-            child: DropdownButtonFormField<String>(
-              value: selectedLanguage,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              items: const [
-                DropdownMenuItem(
-                  value: 'pt',
-                  child: Text("Português (Brasil)"),
-                ),
-                DropdownMenuItem(value: 'en', child: Text("Inglês (English)")),
-                DropdownMenuItem(
-                  value: 'es',
-                  child: Text("Espanhol (Español)"),
-                ),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  selectedLanguage = value!;
-                });
-              },
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // ========= EFEITOS SONOROS =========
-          _buildCard(
-            title: "Efeitos Sonoros",
-            child: SwitchListTile(
-              value: soundEffects,
-              title: const Text("Ativar sons do aplicativo"),
-              onChanged: (value) {
-                setState(() {
-                  soundEffects = value;
-                });
-              },
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // ========= MODO ESCURO =========
-          _buildCard(
-            title: "Modo Escuro",
-            child: SwitchListTile(
-              value: darkMode,
-              title: const Text("Ativar modo escuro"),
-              onChanged: (value) {
-                setState(() {
-                  darkMode = value;
-                });
-              },
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // ========= AJUDA =========
-          _buildButtonCard(
-            icon: Icons.help_outline,
-            text: "Ajuda",
-            onTap: () {},
-          ),
-
-          const SizedBox(height: 15),
-
-          // ========= SOBRE =========
-          _buildButtonCard(
-            icon: Icons.info_outline,
-            text: "Sobre",
-            onTap: () {},
-          ),
-
-          const SizedBox(height: 15),
-
-          // ========= EXCLUIR CONTA =========
-          _buildButtonCard(
-            icon: Icons.delete_outline,
-            text: "Excluir Conta",
-            color: Colors.red,
-            onTap: () {},
-          ),
-
-          const SizedBox(height: 15),
-
-          // ========= SAIR =========
-          _buildButtonCard(
-            icon: Icons.logout,
-            text: "Sair",
-            color: Colors.black,
-            onTap: () {},
-          ),
-        ],
-      ),
+  // --- Funções de Ação ---
+  
+  void _handleLogout() async {
+    await AuthService().signOut();
+    
+    // Atualiza o estado da tela após o logout
+    _checkLoginStatus(); 
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Você saiu da sua conta.")),
     );
+  }
+
+  void _handleDeleteAccount() async {
+    // Confirmação do usuário antes de excluir
+    
+    String? erro = await AuthService().deleteUser();
+    
+    if (erro == null) {
+      // Sucesso: Atualiza o estado e notifica
+      _checkLoginStatus();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Conta excluída com sucesso.")),
+      );
+    } else {
+      // Erro (ex: precisa logar novamente)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erro ao excluir conta: $erro")),
+      );
+    }
   }
 
   // ------------ COMPONENTE REUTILIZÁVEL: CARD DE CONFIGURAÇÃO ------------
@@ -238,6 +129,148 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 250, 250, 250),
+      body: ListView(
+        padding: const EdgeInsets.all(10),
+        children: [
+          const SizedBox(height: 10),
+
+          // ========= ÍCONE CENTRAL =========
+          Center(
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: const BoxDecoration(),
+                  child: const Icon(
+                    Icons.settings,
+                    size: 55,
+                    color: Color.fromARGB(255, 51, 51, 51),
+                  ),
+                ),
+                const SizedBox(height: 5),
+                const Text(
+                  "Configurações",
+                  style: TextStyle(fontSize: 27, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 51, 51, 51)),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 30),
+
+          // ========= IDIOMA, EFEITOS SONOROS, MODO ESCURO =========
+          
+          // ========= IDIOMA =========
+          _buildCard(
+            title: "Idioma",
+            child: DropdownButtonFormField<String>(
+              value: selectedLanguage,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              items: const [
+                DropdownMenuItem(
+                  value: 'pt',
+                  child: Text("Português (Brasil)"),
+                ),
+                DropdownMenuItem(value: 'en', child: Text("Inglês (English)")),
+                DropdownMenuItem(
+                  value: 'es',
+                  child: Text("Espanhol (Español)"),
+                ),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  selectedLanguage = value!;
+                });
+              },
+            ),
+          ),
+
+          const SizedBox(height: 20),
+          
+          const SizedBox(height: 20),
+
+          // ========= EFEITOS SONOROS =========
+          _buildCard(
+            title: "Efeitos Sonoros",
+            child: SwitchListTile(
+              value: soundEffects,
+              title: const Text("Ativar sons do aplicativo"),
+              onChanged: (value) {
+                setState(() {
+                  soundEffects = value;
+                });
+              },
+            ),
+          ),
+
+          const SizedBox(height: 20),
+                    
+          // ========= MODO ESCURO =========
+          _buildCard(
+            title: "Modo Escuro",
+            child: SwitchListTile(
+              value: darkMode,
+              title: const Text("Ativar modo escuro"),
+              onChanged: (value) {
+                setState(() {
+                  darkMode = value;
+                });
+              },
+            ),
+          ),
+
+          const SizedBox(height: 20),
+          
+          // ========= AJUDA E SOBRE (Botões fixos) =========
+          _buildButtonCard(
+            icon: Icons.help_outline,
+            text: "Ajuda",
+            onTap: () {},
+          ),
+          const SizedBox(height: 15),
+          _buildButtonCard(
+            icon: Icons.info_outline,
+            text: "Sobre",
+            onTap: () {},
+          ),
+          const SizedBox(height: 15),
+          
+
+          // ========= EXCLUIR CONTA (CONDICIONAL) =========
+          if (_isLoggedIn)
+            _buildButtonCard(
+              icon: Icons.delete_outline,
+              text: "Excluir Conta",
+              color: Colors.red,
+              onTap: _handleDeleteAccount, // Chama a função de exclusão
+            ),
+            
+          if (_isLoggedIn) const SizedBox(height: 15),
+
+          // ========= SAIR (CONDICIONAL) =========
+          if (_isLoggedIn)
+            _buildButtonCard(
+              icon: Icons.logout,
+              text: "Sair",
+              color: Colors.black,
+              onTap: _handleLogout, // Chama a função de sair
+            ),
+            
+          const SizedBox(height: 15),
+        ],
       ),
     );
   }

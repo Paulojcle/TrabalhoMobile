@@ -20,8 +20,8 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages = const [
     HomePage(), /* MENÚ: PÁGINA INICIAL */
     ConfirmacaoReserva(),   /* MENÚ: QUARTOS */
-    ProfilePage(),    /* MENÚ: CONFIGURAÇÕES */
-    Center(child: Text('Página Perfil')),   /* MENÚ: PERFIL (caso não logado, redirecionar para LOGIN) */
+    ConfigurationPage(),    /* MENÚ: CONFIGURAÇÕES */
+    ProfilePage(),   /* MENÚ: PERFIL (caso não logado, redirecionar para LOGIN) */
   ];
 
   @override
@@ -31,7 +31,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _onItemTapped(int index) async {
-    if (index == 4) {
+    if (index == 3) {
       bool permitido = await requireLogin(context);
       if (!permitido) return;
     }
@@ -44,6 +44,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       // Mostra a página atual com base no _selectedIndex
       body: _pages[_selectedIndex],
 

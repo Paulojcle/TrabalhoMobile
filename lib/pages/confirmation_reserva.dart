@@ -17,7 +17,7 @@ class ConfirmacaoReserva extends StatelessWidget {
                   Icon(
                     Icons.check_circle_outline,
                     color: Colors.green,
-                    size: 200,
+                    size: 250,
                   ),
                   SizedBox(height: 20),
                   Text(

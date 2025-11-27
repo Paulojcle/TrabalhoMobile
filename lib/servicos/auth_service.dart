@@ -44,9 +44,65 @@ class AuthService {
           return e.message ?? "Erro desconhecido no Firebase.";
       }
     } catch (e) {
-      // Erro genérico (pode ser Firestore ou erro de código)
       print("Erro Geral: $e");
       return "Ocorreu um erro ao cadastrar: $e";
+    }
+  }
+
+  // Logout usuário
+  Future<void> signOut() async {
+    await _auth.signOut();
+  }
+
+  // Login usuário
+  Future<String?> signInUser({
+    required String email,
+    required String senha,
+  }) async {
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: senha,
+      );
+      return null; // Sucesso
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'user-not-found':
+          return 'Usuário não encontrado para este email.';
+        case 'wrong-password':
+          return 'Senha incorreta. Tente novamente.';
+        case 'invalid-email':
+          return 'O formato do email é inválido.';
+        case 'channel-error':
+          return 'O email e a senha são obrigatórios.';
+        default:
+          return e.message ?? 'Erro desconhecido ao tentar logar.';
+      }
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  // EXCLUIR CONTA
+  Future<String?> deleteUser() async {
+    User? user = _auth.currentUser;
+    if (user == null) return "Nenhum usuário logado.";
+
+    try {
+      // 1. Exclui o documento do Firestore
+      await _firestore.collection('usuario').doc(user.uid).delete();
+
+      // 2. Exclui a conta do Firebase Auth
+      await user.delete();
+      
+      return null; // Sucesso
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        return "É necessário logar novamente para excluir a conta.";
+      }
+      return e.message;
+    } catch (e) {
+      return e.toString();
     }
   }
 
