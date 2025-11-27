@@ -12,10 +12,7 @@ class HomePage extends StatelessWidget {
             backgroundColor: Colors.white,
             elevation: 2,
             centerTitle: true,
-            title: Image.asset(
-              'assets/logo.png',
-              height: 40,
-            ),
+            title: Image.asset('assets/logo.png', height: 40),
           ),
 
           body: SingleChildScrollView(
@@ -26,7 +23,10 @@ class HomePage extends StatelessWidget {
                 // container de filtros
                 Container(
                   height: 70,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 20,
+                  ),
                   margin: const EdgeInsets.only(bottom: 20),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -47,10 +47,7 @@ class HomePage extends StatelessWidget {
                     children: [
                       const Text(
                         'Filtros',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.grey, fontSize: 14),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -87,8 +84,9 @@ class HomePage extends StatelessWidget {
                     children: [
                       // Imagem do quarto
                       ClipRRect(
-                        borderRadius:
-                            const BorderRadius.vertical(top: Radius.circular(12)),
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(12),
+                        ),
                         child: Stack(
                           children: [
                             Image.asset(
@@ -102,19 +100,28 @@ class HomePage extends StatelessWidget {
                               bottom: 8,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 4),
+                                  horizontal: 6,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.black.withOpacity(0.6),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Row(
                                   children: [
-                                    Icon(Icons.photo_camera,
-                                        color: Colors.white, size: 14),
+                                    Icon(
+                                      Icons.photo_camera,
+                                      color: Colors.white,
+                                      size: 14,
+                                    ),
                                     SizedBox(width: 4),
-                                    Text('4',
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 12)),
+                                    Text(
+                                      '4',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -144,8 +151,11 @@ class HomePage extends StatelessWidget {
                                 ),
                                 const Row(
                                   children: [
-                                    Icon(Icons.star,
-                                        color: Colors.amber, size: 18),
+                                    Icon(
+                                      Icons.star,
+                                      color: Colors.amber,
+                                      size: 18,
+                                    ),
                                     SizedBox(width: 2),
                                     Text(
                                       '4,1/5',
@@ -165,7 +175,11 @@ class HomePage extends StatelessWidget {
                                 SizedBox(width: 4),
                                 Text('2', style: TextStyle(fontSize: 13)),
                                 SizedBox(width: 12),
-                                Icon(Icons.people, size: 20, color: Colors.grey),
+                                Icon(
+                                  Icons.people,
+                                  size: 20,
+                                  color: Colors.grey,
+                                ),
                                 SizedBox(width: 4),
                                 Text('3', style: TextStyle(fontSize: 13)),
                               ],
@@ -213,9 +227,7 @@ class HomePage extends StatelessWidget {
                                   ),
                                   child: const Text(
                                     'Ver',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ),
+                                    style: TextStyle(color: Colors.white),
                                   ),
                                 ),
                               ],
@@ -232,50 +244,6 @@ class HomePage extends StatelessWidget {
         ),
 
         // menu inferior fixo
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 6,
-                  offset: Offset(0, -2),
-                ),
-              ],
-            ),
-            child: BottomNavigationBar(
-              currentIndex: 0,
-              type: BottomNavigationBarType.fixed,
-              backgroundColor: Colors.white,
-              selectedItemColor: Colors.blue[900],
-              unselectedItemColor: Colors.grey,
-              showUnselectedLabels: true,
-              onTap: (index) {
-                print('Item $index clicado');
-              },
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: 'Início',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.bed),
-                  label: 'Quartos',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.settings),
-                  label: 'Configurações',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person),
-                  label: 'Perfil',
-                ),
-              ],
-            ),
-          ),
-        ),
       ],
     );
   }
