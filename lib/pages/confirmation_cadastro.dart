@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hotel_app/main_screen.dart';
 
 class ConfirmacaoCadastro extends StatelessWidget {
   const ConfirmacaoCadastro({super.key});
@@ -40,7 +41,13 @@ class ConfirmacaoCadastro extends StatelessWidget {
                 height: 60,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navegação
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MainScreen(indexInicial: 0), // seleciona "Quartos"
+                      ),
+                      (route) => false, // remove todas as telas anteriores
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 25, 44, 80),

@@ -7,7 +7,8 @@ import 'servicos/auth_guard.dart';
 import 'pages/configuration_page.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int indexInicial;
+  const MainScreen({super.key, this.indexInicial = 0});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -29,6 +30,12 @@ class _MainScreenState extends State<MainScreen> {
       child: Text('Página Perfil'),
     ) /* MENÚ: PERFIL (caso não logado, redirecionar para LOGIN) */,
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.indexInicial; // inicializa com o índice recebido
+  }
 
   void _onItemTapped(int index) async {
     if (index == 4) {

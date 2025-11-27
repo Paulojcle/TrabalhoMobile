@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hotel_app/servicos/auth_service.dart';
+import 'confirmation_cadastro.dart';
 
 class CadastroPage extends StatefulWidget {
   const CadastroPage({super.key});
@@ -10,8 +12,24 @@ class CadastroPage extends StatefulWidget {
 class _CadastroPageState extends State<CadastroPage> {
   bool _obscureSenha = true;
   bool _obscureConfirmarSenha = true;
+  final TextEditingController _nomeController = TextEditingController();
+  final TextEditingController _sobrenomeController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _confirmarEmailController = TextEditingController();
+  final TextEditingController _senhaController = TextEditingController();
+  final TextEditingController _confirmarSenhaController = TextEditingController();
 
   @override
+  void dispose() {
+    _nomeController.dispose();
+    _sobrenomeController.dispose();
+    _emailController.dispose();
+    _confirmarEmailController.dispose();
+    _senhaController.dispose();
+    _confirmarSenhaController.dispose();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -46,6 +64,7 @@ class _CadastroPageState extends State<CadastroPage> {
                 child: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               TextField(
+                controller: _nomeController,
                 decoration: _inputDecoration(),
               ),
               const SizedBox(height: 30),
@@ -56,6 +75,7 @@ class _CadastroPageState extends State<CadastroPage> {
                 child: Text('Sobrenome', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               TextField(
+                controller: _sobrenomeController,
                 decoration: _inputDecoration(),
               ),
               const SizedBox(height: 30),
@@ -66,6 +86,7 @@ class _CadastroPageState extends State<CadastroPage> {
                 child: Text('Email', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               TextField(
+                controller: _emailController,
                 decoration: _inputDecoration(),
                 keyboardType: TextInputType.emailAddress,
               ),
@@ -77,6 +98,7 @@ class _CadastroPageState extends State<CadastroPage> {
                 child: Text('Confirmar Email', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               TextField(
+                controller: _confirmarEmailController,
                 decoration: _inputDecoration(),
                 keyboardType: TextInputType.emailAddress,
               ),
@@ -89,6 +111,7 @@ class _CadastroPageState extends State<CadastroPage> {
               ),
               TextField(
                 obscureText: _obscureSenha,
+                controller: _senhaController,
                 decoration: _inputDecoration().copyWith(
                   suffixIcon: IconButton(
                     padding: const EdgeInsets.only(right: 20),
@@ -113,6 +136,7 @@ class _CadastroPageState extends State<CadastroPage> {
               ),
               TextField(
                 obscureText: _obscureConfirmarSenha,
+                controller: _confirmarSenhaController,
                 decoration: _inputDecoration().copyWith(
                   suffixIcon: IconButton(
                     padding: const EdgeInsets.only(right: 20),
@@ -133,8 +157,54 @@ class _CadastroPageState extends State<CadastroPage> {
               // Botão Cadastrar centralizado
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Aqui você vai para a tela de sucesso
+                  onPressed: () async {
+                    String nome = _nomeController.text.trim();
+                    String sobrenome = _sobrenomeController.text.trim();
+                    String email = _emailController.text.trim();
+                    String confirmarEmail = _confirmarEmailController.text.trim();
+                    String senha = _senhaController.text.trim();
+                    String confirmarSenha = _confirmarSenhaController.text.trim();
+
+                    if (nome.isEmpty || sobrenome.isEmpty || email.isEmpty || senha.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Preencha todos os campos!")),
+                      );
+                      return;
+                    }
+
+                    if (email != confirmarEmail) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Os emails não coincidem")),
+                      );
+                      return;
+                    }
+
+                    if (senha != confirmarSenha) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("As senhas não coincidem")),
+                      );
+                      return;
+                    }
+
+                    String? res = await AuthService().registerUser(
+                      nome: nome,
+                      sobrenome: sobrenome,
+                      email: email,
+                      senha: senha,
+                    );
+
+                    if (res != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(res)),
+                      );
+                    } else {
+                      // Cadastro bem-sucedido: redireciona para perfil
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ConfirmacaoCadastro()),
+                      );
+                    }
+
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 25, 44, 80),
