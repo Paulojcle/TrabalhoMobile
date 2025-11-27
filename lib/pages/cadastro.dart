@@ -198,7 +198,7 @@ class _CadastroPageState extends State<CadastroPage> {
                         SnackBar(content: Text(res)),
                       );
                     } else {
-                      // Cadastro bem-sucedido: redireciona para perfil
+                      // Cadastro bem-sucedido: redireciona para confirmação de cadastro 
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (_) => const ConfirmacaoCadastro()),

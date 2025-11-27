@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'cadastro.dart';
 import 'recuperacao_senha.dart';
-import '../servicos/auth_service.dart'; // Importe o seu AuthService
+import '../servicos/auth_service.dart';
+import 'package:hotel_app/main_screen.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -53,7 +54,13 @@ class _LoginPageState extends State<LoginPage> {
       );
     } else {
       // Sucesso: Fecha a LoginPage e retorna para a MainScreen
-      Navigator.pop(context); 
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MainScreen(indexInicial: 0), // seleciona "Quartos"
+        ),
+        (route) => false, // remove todas as telas anteriores
+      );
     }
   }
 

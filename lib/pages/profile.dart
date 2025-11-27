@@ -16,30 +16,30 @@ class _ProfilePageState extends State<ProfilePage> {
   String telefone = '77 9 9999-2211';
   String dataNascimento = '08/12/2003';
   String senha = '***********';
-  String? fotoUrl; // null por enquanto, depois Firebase
+  String? fotoUrl; 
 
-  // Função reutilizável para campos do perfil
+  // === FUNÇÃO REUTILIZÁVEL ORIGINAL (para campos de DADOS separados) ===
   Widget campoPerfil(String label, String valor, {bool mostrarSeta = true}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+        Text(label, style: const TextStyle(fontSize: 16, color: Color(0xFF333333), fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 233, 230, 230),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(valor, style: const TextStyle(fontSize: 16)),
+              Text(valor, style: const TextStyle(fontSize: 16, color: Color(0xFF7F7F7F))),
               if (mostrarSeta)
                 const Icon(
                   Icons.arrow_forward_ios,
                   size: 20,
-                  color: Colors.grey,
+                  color: Color(0xFFD9D9D9)
                 ),
             ],
           ),
@@ -49,13 +49,45 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // === FUNÇÃO PARA AS LINHAS AGRUPADAS (Sem fundo, com divisor interno) ===
+  Widget _buildGroupedRow(String label, String valor, {bool mostrarSeta = true}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label, style: const TextStyle(fontSize: 16, color: Color(0xFF333333))),
+              
+              Row(
+                children: [
+                  Text(valor, style: const TextStyle(fontSize: 16, color: Color(0xFF7F7F7F))),
+                  if (mostrarSeta)
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 20,
+                      color: Color(0xFFD9D9D9)
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 250, 250, 250),
+      backgroundColor: const Color(0xFFF6F6F6),
       
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        // Padding lateral ajustado
+        padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0),
         child: Column(
           children: [
             // Avatar
@@ -83,33 +115,55 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 20),
 
-            // Seção Dados
+            // Seção Dados (Mantém o estilo de cards separados)
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Dados',
-                style: TextStyle(fontSize: 20, color: Colors.grey),
+                style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 51, 51, 51), fontWeight: FontWeight.bold),
               ),
             ),
             const Divider(),
-            campoPerfil('Nome', nome),
-            campoPerfil('Sobrenome', sobrenome),
-            campoPerfil('CPF', cpf),
-            campoPerfil('Data de Nascimento', dataNascimento),
-            campoPerfil('Telefone', telefone),
+            campoPerfil('Nome', nome, mostrarSeta: false),
+            campoPerfil('Sobrenome', sobrenome, mostrarSeta: false),
+            campoPerfil('CPF', cpf, mostrarSeta: false),
+            campoPerfil('Data de Nascimento', dataNascimento, mostrarSeta: false),
+            campoPerfil('Telefone', telefone, mostrarSeta: false),
 
             // Seção Segurança
             const SizedBox(height: 20),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Segurança',
-                style: TextStyle(fontSize: 20, color: Colors.grey),
+            
+            // === CONTAINER BRANCO DE AGRUPAMENTO COM O TÍTULO INTERNO ===
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                children: [
+                    Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                        child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                                'Segurança',
+                                style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 51, 51, 51), fontWeight: FontWeight.bold),
+                            ),
+                        ),
+                    ),
+                    const Divider(height: 1, color: Color(0xFFEBEBEB)),
+                    // ==============================
+
+                    // Item Senha (com divisor)
+                    _buildGroupedRow('Senha', senha, mostrarSeta: false), 
+                    
+                    // Item Alterar Senha (sem divisor, é o último)
+                    _buildGroupedRow('Alterar senha', '', mostrarSeta: true), 
+                ],
               ),
             ),
-            const Divider(),
-            campoPerfil('Senha', senha),
-            campoPerfil('Alterar senha', '', mostrarSeta: true),
+            // ==========================================================
+            const SizedBox(height: 20),
           ],
         ),
       ),
