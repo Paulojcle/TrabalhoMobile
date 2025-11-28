@@ -10,32 +10,60 @@ class ConfirmacaoCadastro extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              // Arte + texto centralizados
+              
+              // Empurra o conteúdo para o centro
+              const Spacer(), 
+
+              // --- ÁREA DE SUCESSO ---
               Column(
-                children: const [
-                  Icon(
-                    Icons.check_circle_outline,
-                    color: Colors.green,
-                    size: 200,
+                children: [
+                  // Ícone com fundo circular (Estilo moderno)
+                  Container(
+                    padding: const EdgeInsets.all(30),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1), // Fundo verde bem clarinho
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      color: Colors.green,
+                      size: 100, // Tamanho equilibrado
+                    ),
                   ),
-                  SizedBox(height: 20),
-                  Text(
-                    'Cadastro realizado com sucesso!',
+                  
+                  const SizedBox(height: 40),
+                  
+                  const Text(
+                    'Tudo pronto!',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0B2A4A), // Cor da marca
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  
+                  const SizedBox(height: 15),
+                  
+                  const Text(
+                    'Seu cadastro foi realizado com sucesso.\nAgora você pode aproveitar o SleepWell.',
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 51, 51, 51)
+                      color: Colors.grey, // Texto secundário mais suave
+                      height: 1.5, // Espaçamento entre linhas
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ],
               ),
 
-              // Botão fixo na parte inferior
+              // Empurra o botão para o final
+              const Spacer(), 
+
+              // --- BOTÃO DE AÇÃO ---
               SizedBox(
                 width: double.infinity,
                 height: 60,
@@ -44,27 +72,31 @@ class ConfirmacaoCadastro extends StatelessWidget {
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MainScreen(indexInicial: 0), // seleciona "Quartos"
+                        builder: (context) => const MainScreen(indexInicial: 0),
                       ),
-                      (route) => false, // remove todas as telas anteriores
+                      (route) => false,
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 25, 44, 80),
+                    backgroundColor: const Color(0xFF0B2A4A),
+                    elevation: 5, // Sombra sutil
+                    shadowColor: const Color(0xFF0B2A4A).withOpacity(0.4),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50),
+                      borderRadius: BorderRadius.circular(20), // Bordas modernas
                     ),
                   ),
                   child: const Text(
-                    'Voltar à tela inicial',
+                    'Começar a explorar',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
+              
+              const SizedBox(height: 20), // Margem inferior extra
             ],
           ),
         ),
