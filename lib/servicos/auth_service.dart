@@ -114,7 +114,7 @@ class AuthService {
     }
   }
 
-  // === REDEFINIR SENHA ===
+  // === REDEFINIR SENHA EMAIL ===
   Future<String?> redefinirSenha({required String email}) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
@@ -128,6 +128,18 @@ class AuthService {
         default:
           return e.message ?? 'Erro ao enviar email.';
       }
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  // === CONFIRMAR REDEFINIÇÃO DE SENHA (Deep Link) ===
+  Future<String?> confirmarRedefinicaoSenha({required String code, required String newPassword}) async {
+    try {
+      await _auth.confirmPasswordReset(code: code, newPassword: newPassword);
+      return null; // Sucesso
+    } on FirebaseAuthException catch (e) {
+      return e.message;
     } catch (e) {
       return e.toString();
     }
