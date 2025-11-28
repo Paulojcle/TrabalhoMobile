@@ -114,5 +114,24 @@ class AuthService {
     }
   }
 
+  // === REDEFINIR SENHA ===
+  Future<String?> redefinirSenha({required String email}) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      return null; // Sucesso (null significa sem erros)
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'user-not-found':
+          return 'Email não cadastrado.';
+        case 'invalid-email':
+          return 'Email inválido.';
+        default:
+          return e.message ?? 'Erro ao enviar email.';
+      }
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
   User? get currentUser => _auth.currentUser;
 }

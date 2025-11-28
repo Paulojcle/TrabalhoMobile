@@ -24,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  // 2. Lógica de Autenticação (Mantida idêntica)
+  // 2. Lógica de Autenticação
   void _fazerLogin(BuildContext context) async {
     final email = _emailController.text.trim();
     final senha = _senhaController.text.trim();
@@ -51,6 +51,7 @@ class _LoginPageState extends State<LoginPage> {
         SnackBar(content: Text(res)),
       );
     } else {
+      // Login com sucesso: limpa tudo e vai para a home
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
@@ -63,16 +64,14 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Pega o tamanho da tela para cálculos de proporção
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      // resizeToAvoidBottomInset: false impede que a imagem de fundo esprema quando o teclado abre
       resizeToAvoidBottomInset: false, 
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // 1. IMAGEM DE FUNDO (Ocupa a tela toda)
+          // 1. IMAGEM DE FUNDO
           Positioned.fill(
             child: Image.network(
               "https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg",
@@ -80,19 +79,32 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
           
-          // 1.1 Overlay escuro para melhorar o contraste do botão de voltar (Opcional)
+          // 1.1 Overlay escuro
           Positioned.fill(
             child: Container(
               color: Colors.black.withOpacity(0.2),
             ),
           ),
 
-          // 2. BOTÃO DE VOLTAR (Customizado)
+          // 2. BOTÃO DE VOLTAR 
           Positioned(
-            top: 50, // Margem segura do topo
+            top: 50,
             left: 20,
             child: GestureDetector(
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                // === CORREÇÃO AQUI ===
+                // Verifica se existe histórico para voltar.
+                // Se o ChecarEmail limpou o histórico, canPop será false.
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  // Se não tem pra onde voltar, recria a MainScreen
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MainScreen(indexInicial: 0)),
+                  );
+                }
+              },
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -111,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          // 3. TÍTULO GRANDE NO FUNDO (Opcional, dá um charme moderno)
+          // 3. TÍTULO
           const Positioned(
             top: 120,
             left: 30,
@@ -133,11 +145,11 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          // 4. O MODAL BRANCO (Fica embaixo e sobe até ~60% da tela)
+          // 4. O MODAL BRANCO
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              height: size.height * 0.60, // Ocupa 60% da altura da tela
+              height: size.height * 0.60,
               width: double.infinity,
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -155,13 +167,11 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
               child: Padding(
-                // Padding para o conteúdo não colar nas bordas
-                // e EdgeInsets.only(bottom: ...) para lidar com teclado se necessário
                 padding: EdgeInsets.only(
                   left: 30, 
                   right: 30, 
                   top: 40,
-                  bottom: MediaQuery.of(context).viewInsets.bottom // Empurra conteúdo com teclado
+                  bottom: MediaQuery.of(context).viewInsets.bottom
                 ),
                 child: SingleChildScrollView(
                   child: Column(
@@ -300,7 +310,6 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
                       
-                      // Espaço extra para garantir que role bem em telas pequenas
                       const SizedBox(height: 20),
                     ],
                   ),

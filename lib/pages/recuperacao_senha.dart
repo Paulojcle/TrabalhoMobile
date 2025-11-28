@@ -1,11 +1,68 @@
 import 'package:flutter/material.dart';
+import '../servicos/auth_service.dart';
+import 'check_email.dart'; 
 
-class RecuperacaoSenha extends StatelessWidget {
+class RecuperacaoSenha extends StatefulWidget {
   const RecuperacaoSenha({super.key});
+
+  @override
+  State<RecuperacaoSenha> createState() => _RecuperacaoSenhaState();
+}
+
+class _RecuperacaoSenhaState extends State<RecuperacaoSenha> {
+  final TextEditingController _emailController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  void _enviarEmailRecuperacao() async {
+    String email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Digite seu email.")),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Chama o serviço
+    String? erro = await AuthService().redefinirSenha(email: email);
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (erro == null) {
+      // === NAVEGAÇÃO PARA CHECAR EMAIL ===
+      if (!mounted) return;
+      
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ChecarEmail()),
+      );
+      // ===============================================
+      
+    } else {
+      // ERRO
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(erro)),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -16,7 +73,6 @@ class RecuperacaoSenha extends StatelessWidget {
           },
         ),
       ),
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -26,45 +82,43 @@ class RecuperacaoSenha extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-              Text(
-                'Recuperar Senha',
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 51, 51, 51)
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Informe seu email associado à sua conta e nós iremos enviar um email com instruções para redefinir sua senha',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Color(0xFF7F7F7F)
-                ),
-              ),
-              const SizedBox(height: 50),
-              TextField(
+                  const Text(
+                    'Recuperar Senha',
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 51, 51, 51),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Informe seu email associado à sua conta e nós iremos enviar um email com instruções para redefinir sua senha',
+                    style: TextStyle(fontSize: 15, color: Color(0xFF7F7F7F)),
+                  ),
+                  const SizedBox(height: 50),
+                  
+                  // CAMPO DE TEXTO
+                  TextField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       hintText: 'email@email.com',
-                      hintStyle: TextStyle(color: Color(0xFF7F7F7F), fontSize: 14), // texto cinza
+                      hintStyle: const TextStyle(color: Color(0xFF7F7F7F), fontSize: 14),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
-                        borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)), // borda padrão
+                        borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
-                        borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)), // borda quando não está focado
+                        borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
-                        borderSide: const BorderSide(color: Color.fromARGB(255, 0, 30, 54)), // borda quando o campo está focado
+                        borderSide: const BorderSide(color: Color.fromARGB(255, 0, 30, 54)),
                       ),
-                      suffixIcon: Padding(
-                        padding: const EdgeInsets.only(right: 20), // afasta o ícone da borda
-                        child: const Icon(
-                          Icons.email,
-                          color: Colors.grey,
-                        ),
+                      suffixIcon: const Padding(
+                        padding: EdgeInsets.only(right: 20),
+                        child: Icon(Icons.email, color: Colors.grey),
                       ),
                     ),
                   ),
@@ -76,27 +130,35 @@ class RecuperacaoSenha extends StatelessWidget {
                 children: [
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Aqui você vai para a tela de sucesso
-                        // Ex: Navigator.push(context, MaterialPageRoute(builder: (context) => SucessoPage()));
-                      },
+                      onPressed: _isLoading ? null : _enviarEmailRecuperacao,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 25, 44, 80), // azul escuro
-                        minimumSize: const Size.fromHeight(60), // altura do botão
+                        backgroundColor: const Color.fromARGB(255, 25, 44, 80),
+                        minimumSize: const Size.fromHeight(60),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50), // borda arredondada igual aos TextFields
+                          borderRadius: BorderRadius.circular(50),
                         ),
                       ),
-                      child: const Text('Recuperar senha', style: TextStyle(color: Color.fromARGB(255, 255, 255, 255), fontWeight: FontWeight.bold),),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 25,
+                              width: 25,
+                              child: CircularProgressIndicator(color: Colors.white),
+                            )
+                          : const Text(
+                              'Recuperar senha',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 255, 255, 255),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
                 ],
               )
             ],
-
-          ),
           ),
         ),
+      ),
     );
   }
 }

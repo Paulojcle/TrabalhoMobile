@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'login_page.dart'; 
 
 class ChecarEmail extends StatelessWidget {
   const ChecarEmail({super.key});
@@ -24,8 +25,8 @@ class ChecarEmail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               // Arte + texto centralizados
-              Column(
-                children: const [
+              const Column(
+                children: [
                   Icon(
                     Icons.mark_email_unread_outlined,
                     color: Color(0xFF192C50),
@@ -40,6 +41,7 @@ class ChecarEmail extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
+                  SizedBox(height: 10),
                   Text(
                     'Por favor, cheque o seu email. Nós iremos enviar um link de redefinição de senha.',
                     style: TextStyle(
@@ -57,7 +59,12 @@ class ChecarEmail extends StatelessWidget {
                 height: 60,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navegação
+                    // === LÓGICA DE NAVEGAÇÃO ===
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoginPage()),
+                      (route) => false, // Remove todas as telas anteriores da pilha
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 25, 44, 80),
@@ -66,7 +73,7 @@ class ChecarEmail extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    'Reenviar',
+                    'Confirmar',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
