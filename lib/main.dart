@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'splash_screen.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
-// ADICIONE ESTES IMPORTS:
 import 'package:app_links/app_links.dart'; 
-import 'pages/redefinir_senha.dart'; // <--- Verifique se o caminho está correto
+import 'pages/redefinir_senha.dart'; 
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 // 1. Crie esta chave global fora das classes
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -81,6 +81,16 @@ class _MyAppState extends State<MyApp> {
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
       
+      // === CONFIGURAÇÃO DE IDIOMA E LOCALIZAÇÃO ===
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt', 'BR'), // Português Brasil
+        Locale('en', 'US'), // Inglês (opcional)
+      ],
       theme: ThemeData(
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.white,

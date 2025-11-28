@@ -91,6 +91,21 @@ class AuthService {
     }
   }
 
+  // === ATUALIZAR DADOS DO USUÁRIO
+  Future<String?> atualizarDadosUsuario({
+    required String uid,
+    required Map<String, dynamic> dados,
+  }) async {
+    try {
+      await _firestore.collection('usuario').doc(uid).update(dados);
+      return null; // Sucesso
+    } on FirebaseException catch (e) {
+      return e.message ?? "Erro ao atualizar dados.";
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
   // EXCLUIR CONTA
   Future<String?> deleteUser() async {
     User? user = _auth.currentUser;
