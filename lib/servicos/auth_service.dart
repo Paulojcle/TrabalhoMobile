@@ -145,5 +145,35 @@ class AuthService {
     }
   }
 
+  // === ALTERAR SENHA (LOGADO) ===
+  Future<String?> alterarSenha({required String senhaAtual, required String novaSenha}) async {
+    User? user = _auth.currentUser;
+    if (user == null || user.email == null) return "Usuário não identificado.";
+
+    try {
+      // 1. Re-autenticar o usuário com a senha atual para garantir segurança
+      AuthCredential credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: senhaAtual,
+      );
+      
+      await user.reauthenticateWithCredential(credential);
+
+      // 2. Se a senha atual estiver certa, atualiza para a nova
+      await user.updatePassword(novaSenha);
+
+      return null; // Sucesso
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'wrong-password') {
+        return 'A senha atual está incorreta.';
+      } else if (e.code == 'weak-password') {
+        return 'A nova senha é muito fraca.';
+      }
+      return e.message;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
   User? get currentUser => _auth.currentUser;
 }
