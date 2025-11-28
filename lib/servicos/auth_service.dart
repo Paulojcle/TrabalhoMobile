@@ -11,6 +11,10 @@ class AuthService {
     required String sobrenome,
     required String email,
     required String senha,
+    required String cpf,
+    required String telefone,
+    String? fotoUrl,
+    required String dataNascimento,
   }) async {
     try {
       // 1. Tenta criar o usuário
@@ -24,6 +28,10 @@ class AuthService {
         'nome': nome,
         'sobrenome': sobrenome,
         'email': email,
+        'cpf': cpf,
+        'telefone': telefone,
+        'dataNascimento': dataNascimento,
+        'fotoUrl': fotoUrl,
         'dataCadastro': DateTime.now(),
       });
 

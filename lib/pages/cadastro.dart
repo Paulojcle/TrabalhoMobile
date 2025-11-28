@@ -191,6 +191,10 @@ class _CadastroPageState extends State<CadastroPage> {
                       sobrenome: sobrenome,
                       email: email,
                       senha: senha,
+                      cpf: '', 
+                      telefone: '', 
+                      dataNascimento: '',
+                      fotoUrl: null,
                     );
 
                     if (res != null) {
