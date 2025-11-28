@@ -14,8 +14,13 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
   bool soundEffects = true;
   bool darkMode = false;
   
-  // Variável de estado para controlar a exibição dos botões
   bool _isLoggedIn = false; 
+
+  // Definição de cores do tema para consistência
+  final Color _primaryColor = const Color(0xFF192C50); // Azul escuro elegante
+  final Color _backgroundColor = const Color(0xFFF8F9FA); // Cinza muito claro (quase branco)
+  final Color _cardColor = Colors.white;
+  final Color _textColor = const Color(0xFF333333);
 
   @override
   void initState() {
@@ -23,7 +28,6 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
     _checkLoginStatus(); 
   }
 
-  // Verifica o estado de login do Firebase e atualiza o widget
   void _checkLoginStatus() {
     final user = FirebaseAuth.instance.currentUser;
     setState(() {
@@ -32,33 +36,33 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
   }
 
   // === FUNÇÃO AUXILIAR PARA O DIÁLOGO DE CONFIRMAÇÃO ===
-
-  Future<bool> _showConfirmationDialog(BuildContext context, String title, String content) async {
-    // showDialog retorna o valor passado no Navigator.pop, ou null se for fechado externamente.
+  Future<bool> _showConfirmationDialog(BuildContext context, String title, String content, {bool isDestructive = false}) async {
     return await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(title, style: TextStyle(color: _textColor, fontWeight: FontWeight.bold)),
+        content: Text(content, style: const TextStyle(color: Colors.black87)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false), // Não
-            child: const Text('Cancelar'),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true), // Sim (Ação)
-            child: const Text(
-              'Confirmar',
-              style: TextStyle(color: Colors.red),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isDestructive ? Colors.redAccent : _primaryColor,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
             ),
+            child: const Text('Confirmar', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
-    ) ?? false; // Garante que retorna false se o diálogo for fechado
+    ) ?? false;
   }
 
   // === Funções de Ação ===
-  
   void _handleLogout() async {
     final confirmed = await _showConfirmationDialog(
       context,
@@ -66,51 +70,55 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
       "Você deseja realmente sair da sua conta?",
     );
     
-    if (!confirmed) return; // Se o usuário cancelar, a função para aqui.
+    if (!confirmed) return;
 
     await AuthService().signOut();
     _checkLoginStatus(); 
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Você saiu da sua conta.")),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Você saiu da sua conta.")),
+      );
+    }
   }
 
   void _handleDeleteAccount() async {
     final confirmed = await _showConfirmationDialog(
       context,
-      "Excluir Conta Permanentemente?",
-      "Atenção! Você realmente deseja excluir sua conta? Esta ação é irreversível e apagará todos os seus dados.",
+      "Excluir Conta?",
+      "Esta ação é irreversível e apagará todos os seus dados.",
+      isDestructive: true,
     );
     
-    if (!confirmed) return; // Se o usuário cancelar, a função para aqui.
+    if (!confirmed) return;
     
     String? erro = await AuthService().deleteUser();
     
-    if (erro == null) {
-      _checkLoginStatus();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Conta excluída com sucesso.")),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erro ao excluir conta: $erro")),
-      );
+    if (mounted) {
+      if (erro == null) {
+        _checkLoginStatus();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Conta excluída com sucesso.")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erro ao excluir conta: $erro")),
+        );
+      }
     }
   }
 
   // ------------ COMPONENTE REUTILIZÁVEL: CARD DE CONFIGURAÇÃO ------------
   Widget _buildCard({required String title, required Widget child}) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        color: _cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 5,
-            offset: const Offset(1, 1),
+            color: Colors.black.withOpacity(0.03), // Sombra muito suave
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -119,9 +127,9 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.grey[600]),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           child,
         ],
       ),
@@ -135,181 +143,183 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
     required VoidCallback onTap,
     Color color = Colors.black87,
   }) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 5,
-              offset: const Offset(1, 1),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: _cardColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1), // Fundo suave para o ícone
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: color, size: 20),
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey[400]), // Seta indicativa
+              ],
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: color),
-            const SizedBox(width: 15),
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: 16,
-                color: color,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 250, 250, 250),
+      backgroundColor: _backgroundColor,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           children: [
             const SizedBox(height: 10),
 
-            // ========= ÍCONE CENTRAL =========
+            // ========= ÍCONE CENTRAL E TÍTULO =========
             Center(
               child: Column(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: const BoxDecoration(),
-                    child: const Icon(
-                      Icons.settings,
-                      size: 55,
-                      color: Color.fromARGB(255, 51, 51, 51),
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withOpacity(0.08), // Círculo decorativo
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.settings_rounded, // Ícone arredondado
+                      size: 40,
+                      color: _primaryColor,
                     ),
                   ),
-                  const SizedBox(height: 5),
-                  const Text(
+                  const SizedBox(height: 12),
+                  Text(
                     "Configurações",
-                    style: TextStyle(fontSize: 27, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 51, 51, 51)),
+                    style: TextStyle(
+                      fontSize: 24, 
+                      fontWeight: FontWeight.bold, 
+                      color: _textColor,
+                      letterSpacing: -0.5,
+                    ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 35),
 
-            // ========= IDIOMA, EFEITOS SONOROS, MODO ESCURO =========
-            
             // ========= IDIOMA =========
             _buildCard(
-              title: "Idioma",
-              child: DropdownButtonFormField<String>(
-                value: selectedLanguage,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+              title: "Preferências",
+              child: Column(
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: selectedLanguage,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      filled: true,
+                      fillColor: Colors.grey[50],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      prefixIcon: const Icon(Icons.language, color: Colors.grey),
+                    ),
+                    icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+                    dropdownColor: Colors.white,
+                    style: TextStyle(color: _textColor, fontSize: 15),
+                    items: const [
+                      DropdownMenuItem(value: 'pt', child: Text("Português (Brasil)")),
+                      DropdownMenuItem(value: 'en', child: Text("Inglês (English)")),
+                      DropdownMenuItem(value: 'es', child: Text("Espanhol (Español)")),
+                    ],
+                    onChanged: (value) => setState(() => selectedLanguage = value!),
                   ),
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: 'pt',
-                    child: Text("Português (Brasil)"),
+                  const SizedBox(height: 12),
+                  // Efeitos Sonoros
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    activeColor: _primaryColor,
+                    value: soundEffects,
+                    title: Text("Efeitos Sonoros", style: TextStyle(color: _textColor, fontWeight: FontWeight.w500)),
+                    onChanged: (value) => setState(() => soundEffects = value),
                   ),
-                  DropdownMenuItem(value: 'en', child: Text("Inglês (English)")),
-                  DropdownMenuItem(
-                    value: 'es',
-                    child: Text("Espanhol (Español)"),
+                  // Modo Escuro
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    activeColor: _primaryColor,
+                    value: darkMode,
+                    title: Text("Modo Escuro", style: TextStyle(color: _textColor, fontWeight: FontWeight.w500)),
+                    onChanged: (value) => setState(() => darkMode = value),
                   ),
                 ],
-                onChanged: (value) {
-                  setState(() {
-                    selectedLanguage = value!;
-                  });
-                },
               ),
             ),
 
             const SizedBox(height: 20),
             
-            const SizedBox(height: 20),
-
-            // ========= EFEITOS SONOROS =========
-            _buildCard(
-              title: "Efeitos Sonoros",
-              child: SwitchListTile(
-                value: soundEffects,
-                title: const Text("Ativar sons do aplicativo"),
-                onChanged: (value) {
-                  setState(() {
-                    soundEffects = value;
-                  });
-                },
-              ),
-            ),
-
-            const SizedBox(height: 20),
-                      
-            // ========= MODO ESCURO =========
-            _buildCard(
-              title: "Modo Escuro",
-              child: SwitchListTile(
-                value: darkMode,
-                title: const Text("Ativar modo escuro"),
-                onChanged: (value) {
-                  setState(() {
-                    darkMode = value;
-                  });
-                },
-              ),
-            ),
-
-            const SizedBox(height: 20),
-            
-            // ========= AJUDA E SOBRE (Botões fixos) =========
+            // ========= AJUDA E SOBRE =========
             _buildButtonCard(
-              icon: Icons.help_outline,
-              text: "Ajuda",
+              icon: Icons.help_outline_rounded,
+              text: "Ajuda e Suporte",
+              color: _primaryColor,
               onTap: () {},
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: 12),
             _buildButtonCard(
-              icon: Icons.info_outline,
-              text: "Sobre",
+              icon: Icons.info_outline_rounded,
+              text: "Sobre o App",
+              color: _primaryColor,
               onTap: () {},
             ),
-            const SizedBox(height: 15),
-            
 
-            // ========= EXCLUIR CONTA (CONDICIONAL) =========
-            if (_isLoggedIn)
+            if (_isLoggedIn) ...[
+              const SizedBox(height: 30),
+              // ========= AÇÕES DA CONTA =========
               _buildButtonCard(
-                icon: Icons.delete_outline,
+                icon: Icons.logout_rounded,
+                text: "Sair da Conta",
+                color: _textColor,
+                onTap: _handleLogout,
+              ),
+              const SizedBox(height: 12),
+              _buildButtonCard(
+                icon: Icons.delete_outline_rounded,
                 text: "Excluir Conta",
-                color: Colors.red,
-                onTap: _handleDeleteAccount, // Chama a função de exclusão
+                color: Colors.redAccent,
+                onTap: _handleDeleteAccount,
               ),
-              
-            if (_isLoggedIn) const SizedBox(height: 15),
-
-            // ========= SAIR (CONDICIONAL) =========
-            if (_isLoggedIn)
-              _buildButtonCard(
-                icon: Icons.logout,
-                text: "Sair",
-                color: Colors.black,
-                onTap: _handleLogout, // Chama a função de sair
-              ),
-              
-            const SizedBox(height: 15),
+            ],
+            
+            const SizedBox(height: 30),
           ],
         ),
-      )
+      ),
     );
   }
 }

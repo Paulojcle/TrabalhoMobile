@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'alterar_senha_page.dart'; // <--- IMPORTANTE: Importe a nova página aqui
+import 'alterar_senha_page.dart';
 
 // ... (Class UserProfile permanece igual) ...
 class UserProfile {
@@ -48,6 +48,13 @@ class _ProfilePageState extends State<ProfilePage> {
   late Future<UserProfile> _profileFuture;
   final String senhaOculta = '***********';
 
+  // Cores do Tema (Mesmas da ConfigurationPage para consistência)
+  final Color _primaryColor = const Color(0xFF192C50);
+  final Color _backgroundColor = const Color(0xFFF8F9FA);
+  final Color _cardColor = Colors.white;
+  final Color _textColor = const Color(0xFF333333);
+  final Color _secondaryTextColor = Colors.grey[600]!;
+
   @override
   void initState() {
     super.initState();
@@ -67,70 +74,94 @@ class _ProfilePageState extends State<ProfilePage> {
     } else {
       return UserProfile(
         nome: firebaseUser?.displayName ?? 'Usuário',
-        sobrenome: 'Novo',
+        sobrenome: '',
         email: authEmail,
       );
     }
   }
 
-  Widget campoPerfil(String label, String valor, {bool mostrarSeta = true}) {
+  // === WIDGET PARA DADOS INDIVIDUAIS (ESTILO CARD) ===
+  Widget campoPerfil(String label, String valor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 10.0), 
-          child: Text(label, style: const TextStyle(fontSize: 16, color: Color(0xFF333333), fontWeight: FontWeight.bold)),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
+          padding: const EdgeInsets.only(left: 10.0, bottom: 6), 
+          child: Text(
+            label, 
+            style: TextStyle(
+              fontSize: 14, 
+              color: _secondaryTextColor, 
+              fontWeight: FontWeight.w600
+            )
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(valor, style: const TextStyle(fontSize: 16, color: Color(0xFF7F7F7F))),
-              if (mostrarSeta)
-                const Icon(Icons.arrow_forward_ios, size: 20, color: Color(0xFFD9D9D9)),
+        ),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            color: _cardColor,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
             ],
           ),
+          child: Text(
+            valor, 
+            style: TextStyle(
+              fontSize: 16, 
+              color: _textColor,
+              fontWeight: FontWeight.w500
+            )
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 20),
       ],
     );
   }
 
-  // === ATUALIZADO: Agora aceita onTap ===
+  // === WIDGET PARA LINHAS AGRUPADAS (CLICÁVEIS OU NÃO) ===
   Widget _buildGroupedRow(String label, String valor, {bool mostrarSeta = true, bool showDivider = true, VoidCallback? onTap}) {
-    return InkWell( // Adicionado InkWell para clique
-      onTap: onTap, 
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(label, style: const TextStyle(fontSize: 16, color: Color(0xFF333333))),
-                Row(
-                  children: [
-                    Text(valor, style: const TextStyle(fontSize: 16, color: Color(0xFF7F7F7F))),
-                    if (mostrarSeta)
-                      const Padding(
-                        padding: EdgeInsets.only(left: 8.0),
-                        child: Icon(Icons.arrow_forward_ios, size: 20, color: Color(0xFFD9D9D9)),
+    return Material( // Material necessário para o efeito InkWell funcionar sobre o container branco
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap, 
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    label, 
+                    style: TextStyle(fontSize: 15, color: _textColor, fontWeight: FontWeight.w500)
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        valor, 
+                        style: TextStyle(fontSize: 15, color: _secondaryTextColor)
                       ),
-                  ],
-                ),
-              ],
+                      if (mostrarSeta)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey[400]),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          if (showDivider)
-            const Divider(height: 1, color: Color(0xFFEBEBEB), indent: 16, endIndent: 16),
-        ],
+            if (showDivider)
+              Divider(height: 1, color: Colors.grey[100], indent: 20, endIndent: 20),
+          ],
+        ),
       ),
     );
   }
@@ -142,93 +173,134 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
+      backgroundColor: _backgroundColor,
       body: SafeArea( 
         child: FutureBuilder<UserProfile>(
           future: _profileFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(child: CircularProgressIndicator(color: _primaryColor));
             }
             if (snapshot.hasError) {
-              return Center(child: Text('Erro ao carregar dados: ${snapshot.error}'));
+              return Center(child: Text('Erro ao carregar dados.', style: TextStyle(color: Colors.red[300])));
             }
             if (snapshot.hasData) {
               final UserProfile userProfile = snapshot.data!;
               
               return SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
                 child: Column(
                   children: [
-                    // Avatar
-                    Center(
-                      child: CircleAvatar(
-                        radius: 40,
-                        backgroundImage: userProfile.fotoUrl.isNotEmpty
-                            ? NetworkImage(userProfile.fotoUrl)
-                            : null,
-                        child: userProfile.fotoUrl.isEmpty
-                            ? const Icon(Icons.person, size: 40, color: Colors.black)
-                            : null,
-                      ),
+                    // === SEÇÃO DE CABEÇALHO (AVATAR + NOME) ===
+                    Column(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 4),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: CircleAvatar(
+                            radius: 50,
+                            backgroundColor: Colors.grey[200],
+                            backgroundImage: userProfile.fotoUrl.isNotEmpty
+                                ? NetworkImage(userProfile.fotoUrl)
+                                : null,
+                            child: userProfile.fotoUrl.isEmpty
+                                ? Icon(Icons.person_rounded, size: 50, color: Colors.grey[400])
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          '${userProfile.nome} ${userProfile.sobrenome}',
+                          style: TextStyle(
+                            fontSize: 24, 
+                            fontWeight: FontWeight.bold, 
+                            color: _primaryColor,
+                            letterSpacing: -0.5
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          userProfile.email,
+                          style: TextStyle(fontSize: 14, color: _secondaryTextColor),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 15),
                     
-                    // Nome e Email
-                    Text(
-                      '${userProfile.nome} ${userProfile.sobrenome}',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      userProfile.email,
-                      style: const TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 40),
 
-                    // Dados
-                    const Align(
+                    // === SEÇÃO DADOS PESSOAIS ===
+                    Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Dados',
-                        style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 51, 51, 51), fontWeight: FontWeight.bold),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10, bottom: 10),
+                        child: Text(
+                          'Dados Pessoais',
+                          style: TextStyle(
+                            fontSize: 20, 
+                            color: _primaryColor, 
+                            fontWeight: FontWeight.bold
+                          ),
+                        ),
                       ),
                     ),
-                    const Divider(),
-                    campoPerfil('Nome', userProfile.nome, mostrarSeta: false),
-                    campoPerfil('Sobrenome', userProfile.sobrenome, mostrarSeta: false),
-                    campoPerfil('CPF', userProfile.cpf, mostrarSeta: false),
-                    campoPerfil('Data de Nascimento', userProfile.dataNascimento, mostrarSeta: false),
-                    campoPerfil('Telefone', userProfile.telefone, mostrarSeta: false),
-
-                    const SizedBox(height: 20),
                     
-                    // Segurança Container
+                    // Campos Individuais (Estilo Card)
+                    campoPerfil('Nome', userProfile.nome),
+                    campoPerfil('Sobrenome', userProfile.sobrenome),
+                    campoPerfil('CPF', userProfile.cpf),
+                    campoPerfil('Data de Nascimento', userProfile.dataNascimento),
+                    campoPerfil('Telefone', userProfile.telefone),
+
+                    const SizedBox(height: 10),
+                    
+                    // === SEÇÃO SEGURANÇA (CARD AGRUPADO) ===
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10, bottom: 10),
+                        child: Text(
+                          'Segurança',
+                          style: TextStyle(
+                            fontSize: 20, 
+                            color: _primaryColor, 
+                            fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Container Agrupado
                     Container(
+                      clipBehavior: Clip.hardEdge, // Garante que o ripple effect não vaze as bordas arredondadas
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
+                        color: _cardColor,
+                        borderRadius: BorderRadius.circular(16),
                         boxShadow: [
-                          BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 5, offset: const Offset(1, 1)),
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.03),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
                         ],
                       ),
                       child: Column(
                         children: [
-                            Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                                child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                        'Segurança',
-                                        style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 51, 51, 51), fontWeight: FontWeight.bold),
-                                    ),
-                                ),
-                            ),
-                            const Divider(height: 1, color: Color(0xFFEBEBEB)),
+                            // Título Interno (Removido ou Simplificado se já tem o externo)
+                            // Optei por remover o título interno duplicado para limpar o visual,
+                            // já que temos o título "Segurança" do lado de fora agora.
                             
                             _buildGroupedRow('Senha', senhaOculta, mostrarSeta: false, showDivider: true), 
                             
-                            // === AÇÃO DE CLIQUE AQUI ===
+                            // Ação de Alterar Senha
                             _buildGroupedRow(
                               'Alterar senha', 
                               '', 
@@ -244,12 +316,12 @@ class _ProfilePageState extends State<ProfilePage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 30),
                   ],
                 ),
               );
             }
-            return const Center(child: Text('Carregando...'));
+            return Center(child: CircularProgressIndicator(color: _primaryColor));
           },
         ),
       ),
