@@ -1,223 +1,401 @@
 import 'package:flutter/material.dart';
 
-class DetalhesQuartoPage extends StatelessWidget {
+class DetalhesQuartoPage extends StatefulWidget {
   const DetalhesQuartoPage({super.key});
+
+  @override
+  State<DetalhesQuartoPage> createState() => _DetalhesQuartoPageState();
+}
+
+class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
+  // Controle do índice da imagem atual
+  int _currentImageIndex = 0;
+
+  // Cores do tema
+  final Color _primaryColor = const Color(0xFF0B2A4A);
+  final Color _backgroundColor = const Color(0xFFF8F9FA);
+  final Color _textColor = const Color(0xFF333333);
+
+  // Lista de imagens (URLs)
+  final List<String> _images = [
+    "https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg",
+    "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg",
+    "https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg",
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // CARROSSEL DE IMAGENS
-                  Container(
-                    height: 260,
-                    child: PageView(
-                      scrollDirection: Axis.horizontal, // Direção horizontal
-                      children: [
-                        Image.network(
-                          "https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg",
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                        Image.network(
-                          "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg",
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // TÍTULO
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      "Suíte Master com vista para a barragem Ceraíma",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // -------------------------
-                  // AVALIAÇÕES
-                  // -------------------------
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: const [
-                        Icon(Icons.star, color: Colors.amber, size: 18),
-                        SizedBox(width: 5),
-                        Text("4.1/5 • 10 avaliações"),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  // ÍCONES CAMAS E BANHEIROS
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: const [
-                        Icon(Icons.bed, size: 20),
-                        SizedBox(width: 6),
-                        Text("2 camas"),
-                        SizedBox(width: 20),
-                        Icon(Icons.bathtub, size: 20),
-                        SizedBox(width: 6),
-                        Text("3 banheiros"),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 25),
-
-                  // SERVIÇOS (Wifi, Estacionamento, Piscina)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Row(
-                          children: [
-                            Icon(Icons.wifi, size: 22),
-                            SizedBox(width: 10),
-                            Text("Wifi"),
-                          ],
-                        ),
-                        SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Icon(Icons.local_parking, size: 22),
-                            SizedBox(width: 10),
-                            Text("Estacionamento"),
-                          ],
-                        ),
-                        SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Icon(Icons.pool, size: 22),
-                            SizedBox(width: 10),
-                            Text("Piscina"),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 25),
-
-                  // DESCRIÇÃO
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      "Descrição",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    child: Text(
-                      "Lorem ipsum dolor sit amet. Cum aliquam quasi et "
-                      "laboriosam dolores aut corporis itaque non velit rem eos "
-                      "voluptates vitae. Sit suscipit cumque in illo reprehenderit "
-                      "est obcaecati fuga. At maxime consequatur et dolorem odio "
-                      "non rem reprehenderit aut molestiae similique. Sed minus "
-                      "perspiciatis et placeat pariatur sit impedit ratione sed "
-                      "accusamus unde.",
-                      textAlign: TextAlign.justify,
-                      style: TextStyle(height: 1.4),
-                    ),
-                  ),
-
-                  const SizedBox(height: 120),  
-                ],
-              ),
-            ),
-
-            // BOTÃO VOLTAR
-            Positioned(
-              top: 10,
-              left: 10,
-              child: CircleAvatar(
-                backgroundColor: Colors.white70,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-            ),
-
-            // RODAPÉ (VALOR + BOTÃO RESERVAR) FIXO
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 8,
-                      offset: const Offset(0, -2),
-                    )
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+      backgroundColor: _backgroundColor,
+      body: Stack(
+        children: [
+          // 1. CONTEÚDO COM SCROLL
+          SingleChildScrollView(
+            // Adiciona padding no fundo para o conteúdo não ficar atrás do rodapé fixo
+            padding: const EdgeInsets.only(bottom: 100), 
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                
+                // === CARROSSEL DE IMAGENS ===
+                Stack(
                   children: [
-                    const Text(
-                      "R\$1.600,50/noite",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                    SizedBox(
+                      height: 300,
+                      child: PageView.builder(
+                        // controller: _pageController, 
+                        onPageChanged: (index) {
+                          setState(() {
+                            _currentImageIndex = index;
+                          });
+                        },
+                        itemCount: _images.length,
+                        itemBuilder: (context, index) {
+                          return Image.network(
+                            _images[index],
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Container(
+                                color: Colors.grey[200],
+                                child: const Center(child: CircularProgressIndicator(color: Color(0xFF0B2A4A))),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey[300],
+                                child: const Icon(Icons.broken_image, color: Colors.grey, size: 50),
+                              );
+                            },
+                          );
+                        },
                       ),
                     ),
-                    const SizedBox(height: 15),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 55,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF0B2A4A),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                    
+                    // Gradiente Base
+                    Positioned(
+                      bottom: 0, left: 0, right: 0,
+                      child: Container(
+                        height: 80,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [Colors.black.withOpacity(0.6), Colors.transparent],
                           ),
                         ),
-                        onPressed: () {},
-                        child: const Text(
-                          "Reservar",
+                      ),
+                    ),
+
+                    // Indicador de Páginas (Bolinhas)
+                    Positioned(
+                      bottom: 20,
+                      left: 0,
+                      right: 0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(_images.length, (index) {
+                          return AnimatedContainer( // Animação suave na troca
+                            duration: const Duration(milliseconds: 300),
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            width: _currentImageIndex == index ? 22 : 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: _currentImageIndex == index ? Colors.white : Colors.white.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+
+                    // Contador de Fotos (Ex: 1/3) - Opcional, muito útil
+                    Positioned(
+                      bottom: 20,
+                      right: 20,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          "${_currentImageIndex + 1} / ${_images.length}",
+                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // === INFORMAÇÕES DO QUARTO ===
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Título e Nota
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "Suíte Master com vista para a barragem Ceraíma",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: _textColor,
+                                height: 1.2,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 10),
+
+                      // Avaliação
+                      Row(
+                        children: [
+                          const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
+                          const SizedBox(width: 4),
+                          Text(
+                            "4.8 (10 avaliações)", 
+                            style: TextStyle(fontWeight: FontWeight.w600, color: _textColor),
+                          ),
+                          const Spacer(),
+                        ],
+                      ),
+
+                      const SizedBox(height: 25),
+                      const Divider(height: 1),
+                      const SizedBox(height: 25),
+
+                      // Detalhes (Camas/Banheiros)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _IconDetail(icon: Icons.bed_rounded, label: "2 Camas"),
+                          _IconDetail(icon: Icons.bathtub_outlined, label: "3 Banheiros"),
+                          _IconDetail(icon: Icons.square_foot_rounded, label: "80m²"),
+                        ],
+                      ),
+
+                      const SizedBox(height: 25),
+                      const Divider(height: 1),
+                      const SizedBox(height: 25),
+
+                      // === O QUE ESSE LUGAR OFERECE ===
+                      Text(
+                        "O que esse lugar oferece",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _textColor),
+                      ),
+                      const SizedBox(height: 15),
+                      
+                      // Lista de serviços em Grid/Wrap
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          _ServiceChip(icon: Icons.wifi, label: "Wifi Rápido"),
+                          _ServiceChip(icon: Icons.local_parking_rounded, label: "Estacionamento"),
+                          _ServiceChip(icon: Icons.pool_rounded, label: "Piscina"),
+                          _ServiceChip(icon: Icons.ac_unit_rounded, label: "Ar Condicionado"),
+                          _ServiceChip(icon: Icons.tv_rounded, label: "Smart TV"),
+                        ],
+                      ),
+
+                      const SizedBox(height: 25),
+                      const Divider(height: 1),
+                      const SizedBox(height: 25),
+
+                      // === DESCRIÇÃO ===
+                      Text(
+                        "Sobre a acomodação",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _textColor),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        "Desfrute de uma experiência única nesta suíte de luxo. Com vista panorâmica, "
+                        "decoração moderna e todo o conforto que você merece. Localização privilegiada "
+                        "próxima aos principais pontos turísticos.\n\n"
+                        "Ideal para casais ou pequenas famílias que buscam tranquilidade e sofisticação.",
+                        style: TextStyle(fontSize: 15, color: Colors.grey[600], height: 1.5),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 2. BOTÕES FLUTUANTES SUPERIORES (Voltar e Favoritar)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            left: 20,
+            right: 20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Botão Voltar
+                _CircleButton(
+                  icon: Icons.arrow_back,
+                  onTap: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+
+          // 3. RODAPÉ FIXO (PREÇO + RESERVAR)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, -5),
+                  )
+                ],
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Preço
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "R\$ 1.600,50",
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: _primaryColor,
                           ),
                         ),
+                        Text(
+                          "/noite",
+                          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                    
+                    // Botão Reservar
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _primaryColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 25),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        "Reservar Agora",
+                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// =======================================================
+// WIDGETS AUXILIARES
+// =======================================================
+
+// 1. Botão Circular Transparente (Topo)
+class _CircleButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _CircleButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8),
           ],
         ),
+        child: Icon(icon, color: Colors.black87, size: 22),
+      ),
+    );
+  }
+}
+
+// 2. Detalhe com Ícone (Cama, Banheiro)
+class _IconDetail extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _IconDetail({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0F2F5),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, size: 24, color: const Color(0xFF0B2A4A)),
+        ),
+        const SizedBox(height: 8),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+      ],
+    );
+  }
+}
+
+// 3. Chip de Serviço (Wifi, Piscina)
+class _ServiceChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _ServiceChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: Colors.grey[700]),
+          const SizedBox(width: 8),
+          Text(label, style: TextStyle(color: Colors.grey[800], fontWeight: FontWeight.w500)),
+        ],
       ),
     );
   }
