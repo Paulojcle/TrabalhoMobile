@@ -78,7 +78,17 @@ class ConfirmacaoReserva extends StatelessWidget {
                 height: 60,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navega para a tela de detalhes da reserva
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetalhesReservaPage(
+                          reservaID: reservaID,
+                          reservaService: reservaService,
+                        ),
+                      ),
+                      // Predicado: Remove rotas até a rota raiz (MainScreen)
+                      (Route<dynamic> route) => route.isFirst,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0B2A4A),

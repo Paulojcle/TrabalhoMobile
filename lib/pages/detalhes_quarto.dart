@@ -332,17 +332,6 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                   icon: Icons.arrow_back,
                   onTap: () => Navigator.pop(context),
                 ),
-                // Botão Favoritar (Mocked)
-                _CircleButton(
-                  icon: Icons.favorite_border,
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Adicionado aos favoritos!'),
-                      ),
-                    );
-                  },
-                ),
               ],
             ),
           ),
