@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'fazer_reserva.dart';
 import '../data/reserva_service.dart';
 import '../models/quarto.dart';
+import '../servicos/auth_guard.dart';
 
 class DetalhesQuartoPage extends StatefulWidget {
   final Quarto quarto;
@@ -387,15 +388,24 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
 
                     // Botão Reservar
                     ElevatedButton(
-                      onPressed: () {
-                        // Lógica para navegar para a próxima tela de reserva
+                      // TRANSFORME O onPressed EM ASYNC
+                      onPressed: () async { 
+                        
+                        // 1. VERIFICA LOGIN
+                        bool isLoggedIn = await requireLogin(context);
+                        
+                        // 2. SE NÃO ESTIVER LOGADO, PARA AQUI (requireLogin já redirecionou)
+                        if (!isLoggedIn) return;
+
+                        // 3. SE ESTIVER LOGADO, CONTINUA COM A RESERVA
+                        if (!mounted) return; // Checagem de segurança do Flutter
+                        
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => FazerReservaPage(
-                              // ⬅️ PASSANDO O SERVIÇO E O QUARTO
                               reservaService: widget.reservaService,
-                              quarto: quarto,
+                              quarto: widget.quarto, // Use 'widget.quarto' aqui
                             ),
                           ),
                         );
