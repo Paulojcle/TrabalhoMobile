@@ -3,11 +3,8 @@ import 'package:hotel_app/data/reserva_service.dart';
 import 'package:hotel_app/models/quarto.dart';
 import 'package:hotel_app/models/reserva.dart';
 import 'confirmation_reserva.dart';
-import '../data/reserva_service.dart';
-import '../models/reserva.dart';
 
 class FazerReservaPage extends StatefulWidget {
-  // ⬅️ INJEÇÃO DE DEPENDÊNCIA: O serviço e o quarto são recebidos
   final ReservaService reservaService;
   final Quarto quarto;
 
@@ -22,13 +19,15 @@ class FazerReservaPage extends StatefulWidget {
 }
 
 class _FazerReservaPageState extends State<FazerReservaPage> {
-  // ⬅️ Variáveis de Estado
+  // Cores do Tema
+  final Color _primaryColor = const Color(0xFF0B2A4A);
+  final Color _backgroundColor = const Color(0xFFF8F9FA);
+  
   DateTime _dataEntrada = DateTime.now();
   DateTime _dataSaida = DateTime.now().add(const Duration(days: 1));
-  int _quantidadeHospedes = 1; // ⬅️ NOVO ESTADO: Quantidade de hóspedes
+  int _quantidadeHospedes = 1;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  // ⬅️ Cálculos derivados
   double get _precoDiaria => widget.quarto.preco;
 
   int get _numDiarias {
@@ -44,11 +43,10 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
   void initState() {
     super.initState();
     _buscarDisponibilidade();
-    // Garante que o número inicial de hóspedes não excede a capacidade do quarto
     _quantidadeHospedes = 1;
   }
 
-  // Função auxiliar para formatação manual de data (removendo a necessidade do 'intl')
+  // Função auxiliar para formatação manual de data
   String _formatarData(DateTime data) {
     return '${data.day.toString().padLeft(2, '0')}/'
         '${data.month.toString().padLeft(2, '0')}/'
@@ -61,19 +59,15 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
     return 'R\$ $valorString';
   }
 
-  // 1. Lógica para buscar disponibilidade (chama a API)
+  // 1. Lógica para buscar disponibilidade
   Future<void> _buscarDisponibilidade() async {
-    // ⚠️ Nota: O setState() para atualizar o _valorTotal já é chamado em _selecionarData
     try {
-      // ⬅️ Chama o método que irá bater na API
       await widget.reservaService.buscarQuartosDisponiveis(
         _dataEntrada,
         _dataSaida,
       );
-      print("Verificação de disponibilidade enviada para a API.");
     } catch (e) {
-      print("Erro ao buscar disponibilidade: $e");
-      // TODO: Mostrar mensagem de erro para o usuário
+      // Mostrar mensagem de erro para o usuário
     }
   }
 
@@ -84,6 +78,19 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
       initialDate: isEntrada ? _dataEntrada : _dataSaida,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      // Aplica o tema do app ao calendário
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: _primaryColor, 
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (dataSelecionada != null) {
@@ -100,19 +107,17 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text(
-                  'A data de saída deve ser depois da data de entrada.',
-                ),
+                content: Text('A data de saída deve ser depois da data de entrada.'),
               ),
             );
           }
         }
-        _buscarDisponibilidade(); // Chama o check de API e, implicitamente, o valor total é recalculado.
+        _buscarDisponibilidade();
       });
     }
   }
 
-  // 2. Lógica para criar a reserva (chama a API)
+  // 2. Lógica para criar a reserva
   Future<void> _fazerReserva(BuildContext context) async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -130,11 +135,10 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
     }
 
     try {
-      // Cria o objeto Reserva para ser serializado (toJson) e enviado
       final novaReserva = Reserva(
-        id: 'temp_id_local', // ID temporário, será substituído pela API
+        id: 'temp_id_local',
         quartoId: widget.quarto.id,
-        clienteId: 'CLIENTE_LOGADO_ID', // Substituir pelo ID do usuário real
+        clienteId: 'CLIENTE_LOGADO_ID',
         dataEntrada: _dataEntrada,
         dataSaida: _dataSaida,
         valorTotal: _valorTotal,
@@ -142,12 +146,15 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
         numHospedes: _quantidadeHospedes,
       );
 
-      // Chama o serviço da API para criar a reserva
       final reservaId = await widget.reservaService.criarNovaReserva(
         novaReserva,
       );
 
-      // Navega para a tela de confirmação (você deve criar esta tela)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Reserva criada com sucesso! ID: $reservaId')),
+      );
+      
+      // Navega para a tela de confirmação
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -158,12 +165,7 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
         ),
       );
 
-      // Exemplo de sucesso:
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Reserva criada com sucesso! ID: $reservaId')),
-      );
     } catch (e) {
-      print("Erro ao processar reserva: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Falha ao criar reserva. Tente novamente.'),
@@ -177,122 +179,152 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: _backgroundColor,
       appBar: AppBar(
-        title: Text('Reservar ${widget.quarto.tipo}'),
-      ), // Usando nome do quarto
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // Detalhes do Quarto
-              Text(
-                'Preço Diária: ${_formatarMoeda(_precoDiaria)}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Seletor de Data de Entrada
-              _buildDataSelector(
-                context,
-                label: 'Check-in (Entrada)',
-                data: _dataEntrada,
-                isEntrada: true,
-              ),
-              const SizedBox(height: 16),
-
-              // Seletor de Data de Saída
-              _buildDataSelector(
-                context,
-                label: 'Check-out (Saída)',
-                data: _dataSaida,
-                isEntrada: false,
-              ),
-              const SizedBox(height: 16),
-
-              // ⬅️ NOVO: Seletor de Quantidade de Hóspedes
-              _buildHospedesSelector(),
-              const SizedBox(height: 30),
-
-              // Resumo da Reserva
-              const Text(
-                'Resumo da Estadia',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Diárias:',
-                    style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-                  ),
-                  Text('$_numDiarias', style: const TextStyle(fontSize: 16)),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Hóspedes:',
-                    style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-                  ),
-                  Text(
-                    '$_quantidadeHospedes',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
-              const Divider(height: 20, thickness: 1),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Valor Total:',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    '${_formatarMoeda(_valorTotal)}',
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blueAccent,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 40),
-
-              // Botão de Reserva
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => _fazerReserva(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF192C50),
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Confirmar Reserva',
-                    style: TextStyle(fontSize: 18, color: Colors.white),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
+        title: const Text(
+          'Confirmar Reserva',
+          style: TextStyle(color: Color(0xFF333333), fontWeight: FontWeight.bold),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF333333)),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                
+                // HEADER INFO
+                Text(
+                  'Quarto: ${widget.quarto.tipo}',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: _primaryColor,
                   ),
                 ),
-              ),
-            ],
+                Text(
+                  'Preço Diária: ${_formatarMoeda(_precoDiaria)}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 30),
+
+                // Seletor de Data de Entrada
+                _buildDataSelector(
+                  context,
+                  label: 'Check-in (Entrada)',
+                  data: _dataEntrada,
+                  isEntrada: true,
+                  icon: Icons.login_rounded,
+                ),
+                const SizedBox(height: 16),
+
+                // Seletor de Data de Saída
+                _buildDataSelector(
+                  context,
+                  label: 'Check-out (Saída)',
+                  data: _dataSaida,
+                  isEntrada: false,
+                  icon: Icons.logout_rounded,
+                ),
+                const SizedBox(height: 25),
+
+                // Seletor de Quantidade de Hóspedes
+                _buildHospedesSelector(),
+                const SizedBox(height: 40),
+
+                // Resumo da Reserva
+                const Text(
+                  'Resumo da Estadia',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
+                ),
+                const Divider(height: 20, thickness: 1),
+                
+                // Linha Diárias
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Período:', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+                    Text('$_numDiarias Diária(s)', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                
+                // Linha Hóspedes
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Hóspedes:', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+                    Text(
+                      '$_quantidadeHospedes Pessoas',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // Linha Total
+                const Divider(height: 20, thickness: 1.5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'VALOR TOTAL:',
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      '${_formatarMoeda(_valorTotal)}',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: _primaryColor, // Cor Primária
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 40),
+
+                // Botão de Reserva
+                SizedBox(
+                  width: double.infinity,
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: () => _fazerReserva(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _primaryColor,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 5,
+                    ),
+                    child: const Text(
+                      'Confirmar Reserva',
+                      style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+
+  // === WIDGETS AUXILIARES ===
 
   Widget _buildHospedesSelector() {
     return Column(
@@ -300,49 +332,48 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
       children: [
         const Text(
           'Quantidade de Hóspedes',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 '$_quantidadeHospedes Pessoas',
-                style: const TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
               Row(
                 children: [
                   _RoundIconButton(
                     icon: Icons.remove,
+                    color: Colors.grey[700]!,
                     onTap: () {
-                      if (_quantidadeHospedes > 1) {
-                        setState(() {
-                          _quantidadeHospedes--;
-                        });
-                      }
+                      if (_quantidadeHospedes > 1) setState(() => _quantidadeHospedes--);
                     },
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 15),
                   _RoundIconButton(
                     icon: Icons.add,
+                    color: _primaryColor,
                     onTap: () {
                       if (_quantidadeHospedes < widget.quarto.capacidade) {
-                        setState(() {
-                          _quantidadeHospedes++;
-                        });
+                        setState(() => _quantidadeHospedes++);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Limite máximo de hóspedes (${widget.quarto.capacidade}) atingido para este quarto.',
-                            ),
-                          ),
+                          SnackBar(content: Text('Limite máximo de hóspedes (${widget.quarto.capacidade}) atingido.')),
                         );
                       }
                     },
@@ -352,6 +383,7 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
             ],
           ),
         ),
+        const SizedBox(height: 4),
         Text(
           'Capacidade máxima do quarto: ${widget.quarto.capacidade} Pessoas.',
           style: TextStyle(fontSize: 12, color: Colors.grey[500]),
@@ -365,27 +397,38 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
     required String label,
     required DateTime data,
     required bool isEntrada,
+    required IconData icon,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 8),
+        Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 10),
         GestureDetector(
           onTap: () => _selecionarData(context, isEntrada),
           child: Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(_formatarData(data), style: const TextStyle(fontSize: 16)),
+                Row(
+                  children: [
+                    Icon(icon, size: 20, color: _primaryColor),
+                    const SizedBox(width: 10),
+                    Text(_formatarData(data), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                  ],
+                ),
                 const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
               ],
             ),
@@ -400,21 +443,22 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
 class _RoundIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
+  final Color color;
 
-  const _RoundIconButton({required this.icon, required this.onTap});
+  const _RoundIconButton({required this.icon, required this.onTap, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(25),
       child: Container(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.blueAccent),
+          color: color.withOpacity(0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 20, color: Colors.blueAccent),
+        child: Icon(icon, size: 20, color: color),
       ),
     );
   }
