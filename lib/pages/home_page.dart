@@ -1,14 +1,65 @@
 import 'package:flutter/material.dart';
 import 'package:hotel_app/pages/detalhes_quarto.dart';
+import '../models/quarto.dart';
+import '../data/reserva_service.dart'; // Import necessário
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+// 1. MUDANÇA: Transformar em StatefulWidget e receber o ReservaService
+class HomePage extends StatefulWidget {
+  final ReservaService reservaService; // Injeção de Dependência
 
+  const HomePage({super.key, required this.reservaService});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final Color _primaryColor = const Color(0xFF0B2A4A);
   final Color _backgroundColor = const Color(0xFFF8F9FA);
 
+  // 2. ESTADO: Variáveis para gerenciar os dados da API
+  List<Quarto>? _quartos;
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  // 3. CICLO DE VIDA: Buscar dados ao iniciar a tela
+  @override
+  void initState() {
+    super.initState();
+    _fetchQuartos();
+  }
+
+  // 4. MÉTODO DE BUSCA DA API
+  Future<void> _fetchQuartos() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      // Chama o serviço injetado para buscar a lista de quartos
+      final quartosDaApi = await widget.reservaService.buscarTodosQuartos();
+      setState(() {
+        _quartos = quartosDaApi;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = "Falha ao carregar quartos. Tente novamente.";
+        _isLoading = false;
+        _quartos = []; // Garante que a lista não é nula em caso de erro
+      });
+      print("Erro ao buscar quartos: $e");
+    }
+  }
+
+  // Função auxiliar para formatação manual de moeda
+  String _formatarMoeda(double valor) {
+    String valorString = valor.toStringAsFixed(2).replaceAll('.', ',');
+    return 'R\$ $valorString';
+  }
+
   // =======================================================
-  // 1. LÓGICA DO MODAL DE NOTIFICAÇÕES (SININHO)
+  // 1. LÓGICA DO MODAL DE NOTIFICAÇÕES
   // =======================================================
   void _openNotificationModal(BuildContext context) {
     showModalBottomSheet(
@@ -21,7 +72,7 @@ class HomePage extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
-            mainAxisSize: MainAxisSize.min, // Ocupa apenas o espaço necessário
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Barrinha cinza no topo (indicador de arraste)
@@ -36,13 +87,11 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              
               const Text(
                 "Notificações",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 15),
-              
               // Lista de Notificações Fake
               Expanded(
                 child: ListView(
@@ -79,7 +128,7 @@ class HomePage extends StatelessWidget {
   }
 
   // =======================================================
-  // 2. LÓGICA DO MODAL DE FILTROS (CAMA/BANHEIRO)
+  // 2. LÓGICA DO MODAL DE FILTROS
   // =======================================================
   void _openFilterModal(BuildContext context) {
     // Valores iniciais
@@ -94,7 +143,6 @@ class HomePage extends StatelessWidget {
       ),
       builder: (context) {
         // StatefulBuilder permite atualizar a tela DENTRO do modal
-        // sem precisar transformar a HomePage inteira em StatefulWidget
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setStateModal) {
             return Padding(
@@ -107,12 +155,17 @@ class HomePage extends StatelessWidget {
                     child: Container(
                       width: 40,
                       height: 4,
-                      decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
-                  const Text("Filtros de Quarto", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Filtros de Quarto",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 30),
 
                   // CONTADOR DE CAMAS
@@ -151,15 +204,25 @@ class HomePage extends StatelessWidget {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Aqui você aplicaria a lógica de filtro real
                         Navigator.pop(context); // Fecha o modal
-                        print("Filtros aplicados: Camas: $camas, Banheiros: $banheiros");
+                        print(
+                          "Filtros aplicados: Camas: $camas, Banheiros: $banheiros",
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _primaryColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text("Aplicar Filtros", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        "Aplicar Filtros",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -172,15 +235,38 @@ class HomePage extends StatelessWidget {
   }
 
   // Helper para desenhar a linha do contador (+ 1 -)
-  Widget _buildCounterRow({required String label, required int value, required VoidCallback onDecrement, required VoidCallback onIncrement}) {
+  Widget _buildCounterRow({
+    required String label,
+    required int value,
+    required VoidCallback onDecrement,
+    required VoidCallback onIncrement,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
         Row(
           children: [
             _RoundButton(icon: Icons.remove, onTap: onDecrement),
-            SizedBox(width: 20, child: Center(child: Text("$value", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))),
+            SizedBox(
+              width: 20,
+              child: Center(
+                child: Text(
+                  "$value",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
             _RoundButton(icon: Icons.add, onTap: onIncrement),
           ],
         ),
@@ -197,13 +283,19 @@ class HomePage extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        title: Image.asset('assets/logo.png', height: 40, errorBuilder: (c, e, s) => Text("SleepWell", style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold))),
+        title: Image.asset(
+          'assets/logo.png',
+          height: 40,
+          errorBuilder: (c, e, s) => Text(
+            "SleepWell",
+            style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold),
+          ),
+        ),
         actions: [
-          // AÇÃO DO SININHO
           IconButton(
             icon: Icon(Icons.notifications_none_rounded, color: _primaryColor),
-            onPressed: () => _openNotificationModal(context), // <--- CHAMA O MODAL AQUI
-          )
+            onPressed: () => _openNotificationModal(context),
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -220,9 +312,7 @@ class HomePage extends StatelessWidget {
                 height: 1.2,
               ),
             ),
-            
             const SizedBox(height: 20),
-
             // BARRA DE PESQUISA COM BOTÃO DE FILTRO
             Container(
               height: 55,
@@ -230,7 +320,11 @@ class HomePage extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
               ),
               child: TextField(
@@ -238,8 +332,6 @@ class HomePage extends StatelessWidget {
                   hintText: "Para onde você vai?",
                   hintStyle: TextStyle(color: Colors.grey[400], fontSize: 15),
                   prefixIcon: Icon(Icons.search_rounded, color: _primaryColor),
-                  
-                  // AÇÃO DO BOTÃO DE FILTRO
                   suffixIcon: Container(
                     margin: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -247,8 +339,12 @@ class HomePage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.tune_rounded, color: _primaryColor, size: 20),
-                      onPressed: () => _openFilterModal(context), // <--- CHAMA O MODAL AQUI
+                      icon: Icon(
+                        Icons.tune_rounded,
+                        color: _primaryColor,
+                        size: 20,
+                      ),
+                      onPressed: () => _openFilterModal(context),
                     ),
                   ),
                   border: InputBorder.none,
@@ -263,41 +359,99 @@ class HomePage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Populares", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF333333))),
-                TextButton(onPressed: (){}, child: const Text("Ver todos", style: TextStyle(color: Colors.grey)))
+                const Text(
+                  "Populares",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF333333),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: const Text(
+                    "Ver todos",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
               ],
             ),
 
             const SizedBox(height: 10),
 
-            // LISTA DE QUARTOS
-            _HotelCard(
-              imageUrl: 'assets/quarto.png',
-              title: 'Suíte Master com vista para a barragem Ceraíma',
-              rating: '4,8',
-              guests: '3',
-              beds: '2',
-              price: 'R\$1.600,50',
-              primaryColor: _primaryColor,
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const DetalhesQuartoPage()));
-              },
-            ),
-            
-            const SizedBox(height: 20),
+            // 5. LÓGICA DE EXIBIÇÃO: Carregamento, Erro ou Lista
+            if (_isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40.0),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (_errorMessage != null)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Colors.red, fontSize: 16),
+                      ),
+                      TextButton(
+                        onPressed: _fetchQuartos,
+                        child: const Text('Tentar Novamente'),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else if (_quartos == null || _quartos!.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40.0),
+                  child: Text("Nenhum quarto encontrado."),
+                ),
+              )
+            else
+              // 6. LISTA DINÂMICA
+              ListView.separated(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: _quartos!.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 20),
+                itemBuilder: (context, index) {
+                  final quarto = _quartos![index];
+                  String precoFormatado = _formatarMoeda(quarto.preco);
 
-            _HotelCard(
-              imageUrl: 'assets/quarto.png',
-              title: 'Quarto Deluxe Casal',
-              rating: '4,5',
-              guests: '2',
-              beds: '1',
-              price: 'R\$850,00',
-              primaryColor: _primaryColor,
-              onTap: () {
-                 Navigator.push(context, MaterialPageRoute(builder: (context) => const DetalhesQuartoPage()));
-              },
-            ),
+                  return _HotelCard(
+                    // Usa a URL real do Quarto (ou fallback)
+                    imageUrl: quarto.imageUrl.isNotEmpty
+                        ? quarto.imageUrl
+                        : '', // Fallback para asset local
+                    title: quarto.tipo,
+                    rating: '4.8', // Mock se não estiver no Model
+                    guests: quarto.capacidade.toString(),
+                    beds: '2', // Mock se não estiver no Model
+                    price: precoFormatado,
+                    primaryColor: _primaryColor,
+                    onTap: () {
+                      // ⬅️ CORREÇÃO CRÍTICA: Passa os argumentos corretos
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetalhesQuartoPage(
+                            quarto: quarto,
+                            reservaService:
+                                widget.reservaService, // Usa o serviço injetado
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+
             const SizedBox(height: 20),
           ],
         ),
@@ -307,10 +461,10 @@ class HomePage extends StatelessWidget {
 }
 
 // =======================================================
-// WIDGETS AUXILIARES
+// WIDGETS AUXILIARES (DECORAÇÃO MANTIDA)
 // =======================================================
 
-// 1. CARD DE HOTEL (Já refinado anteriormente)
+// 1. CARD DE HOTEL (_HotelCard) - Alterado Image.asset para Image.network com fallback
 class _HotelCard extends StatelessWidget {
   final String imageUrl;
   final String title;
@@ -321,7 +475,16 @@ class _HotelCard extends StatelessWidget {
   final Color primaryColor;
   final VoidCallback onTap;
 
-  const _HotelCard({required this.imageUrl, required this.title, required this.rating, required this.guests, required this.beds, required this.price, required this.primaryColor, required this.onTap});
+  const _HotelCard({
+    required this.imageUrl,
+    required this.title,
+    required this.rating,
+    required this.guests,
+    required this.beds,
+    required this.price,
+    required this.primaryColor,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -331,7 +494,14 @@ class _HotelCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), spreadRadius: 0, blurRadius: 15, offset: const Offset(0, 5))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              spreadRadius: 0,
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -339,15 +509,76 @@ class _HotelCard extends StatelessWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                  child: Image.asset(imageUrl, height: 180, width: double.infinity, fit: BoxFit.cover, errorBuilder: (c,e,s) => Container(height: 180, color: Colors.grey[300], child: const Icon(Icons.image, color: Colors.grey))),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
+                  child: imageUrl.startsWith('http')
+                      ? Image.network(
+                          imageUrl,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              height: 180,
+                              color: Colors.grey[200],
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          },
+                          // Fallback se a imagem da rede falhar
+                          errorBuilder: (c, e, s) => Image.asset(
+                            'assets/quarto.png',
+                            height: 180,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      // Se for um caminho de asset local (ex: 'assets/quarto.png')
+                      : Image.asset(
+                          imageUrl,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (c, e, s) => Container(
+                            height: 180,
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.image, color: Colors.grey),
+                          ),
+                        ),
                 ),
                 Positioned(
-                  top: 15, right: 15,
+                  top: 15,
+                  right: 15,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(12)),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.star_rounded, color: Colors.amber, size: 16), const SizedBox(width: 4), Text(rating, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))]),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.star_rounded,
+                          color: Colors.amber,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          rating,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -357,17 +588,66 @@ class _HotelCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF333333), height: 1.3)),
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color(0xFF333333),
+                      height: 1.3,
+                    ),
+                  ),
                   const SizedBox(height: 12),
-                  Row(children: [_IconText(icon: Icons.bed_rounded, text: beds), const SizedBox(width: 15), _IconText(icon: Icons.people_alt_rounded, text: guests)]),
+                  Row(
+                    children: [
+                      _IconText(icon: Icons.bed_rounded, text: beds),
+                      const SizedBox(width: 15),
+                      _IconText(icon: Icons.people_alt_rounded, text: guests),
+                    ],
+                  ),
                   const SizedBox(height: 16),
                   const Divider(height: 1, color: Color(0xFFEEEEEE)),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text("A partir de", style: TextStyle(fontSize: 12, color: Colors.grey)), Text(price, style: TextStyle(color: primaryColor, fontSize: 18, fontWeight: FontWeight.w800))]),
-                      Container(decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), child: const Text('Ver quarto', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "A partir de",
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                          Text(
+                            price,
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        child: const Text(
+                          'Ver quarto',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -380,7 +660,7 @@ class _HotelCard extends StatelessWidget {
   }
 }
 
-// 2. ITEM DE NOTIFICAÇÃO (Para o modal de notificações)
+// 2. ITEM DE NOTIFICAÇÃO (_NotificationItem)
 class _NotificationItem extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -388,7 +668,13 @@ class _NotificationItem extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
 
-  const _NotificationItem({required this.title, required this.subtitle, required this.time, required this.icon, required this.iconColor});
+  const _NotificationItem({
+    required this.title,
+    required this.subtitle,
+    required this.time,
+    required this.icon,
+    required this.iconColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -399,7 +685,10 @@ class _NotificationItem extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: iconColor.withOpacity(0.1), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: iconColor.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
             child: Icon(icon, size: 24, color: iconColor),
           ),
           const SizedBox(width: 15),
@@ -407,11 +696,23 @@ class _NotificationItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(subtitle, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                Text(
+                  subtitle,
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                ),
                 const SizedBox(height: 4),
-                Text(time, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                Text(
+                  time,
+                  style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                ),
               ],
             ),
           ),
@@ -421,7 +722,7 @@ class _NotificationItem extends StatelessWidget {
   }
 }
 
-// 3. BOTÃO REDONDO (Para o modal de filtros + e -)
+// 3. BOTÃO REDONDO (_RoundButton)
 class _RoundButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
@@ -451,6 +752,19 @@ class _IconText extends StatelessWidget {
   const _IconText({required this.icon, required this.text});
   @override
   Widget build(BuildContext context) {
-    return Row(children: [Icon(icon, size: 18, color: Colors.grey[500]), const SizedBox(width: 6), Text(text, style: TextStyle(fontSize: 13, color: Colors.grey[600], fontWeight: FontWeight.w500))]);
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: Colors.grey[500]),
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 13,
+            color: Colors.grey[600],
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
   }
 }
