@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'fazer_reserva.dart';
+import '../data/reserva_service.dart';
+import '../models/quarto.dart';
 
 class DetalhesQuartoPage extends StatefulWidget {
-  const DetalhesQuartoPage({super.key});
+  final Quarto quarto;
+  final ReservaService reservaService;
+  const DetalhesQuartoPage({
+    super.key,
+    required this.quarto,
+    required this.reservaService,
+  });
 
   @override
   State<DetalhesQuartoPage> createState() => _DetalhesQuartoPageState();
@@ -16,15 +25,33 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
   final Color _backgroundColor = const Color(0xFFF8F9FA);
   final Color _textColor = const Color(0xFF333333);
 
-  // Lista de imagens (URLs)
-  final List<String> _images = [
-    "https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg",
-    "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg",
-    "https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg",
-  ];
+  // Lista de imagens (Usando a URL do quarto, mas mantendo a lista para o carrossel.
+  // Se o seu model 'Quarto' não tem uma lista de URLs, usaremos apenas a 'imageUrl')
+  late final List<String> _images;
+
+  @override
+  void initState() {
+    super.initState();
+    // Se o seu modelo Quarto tiver uma lista de imagens (imageUrls), use-a.
+    // Caso contrário, usamos a imageUrl como uma lista de um item para o PageView.
+    // Estou usando a 'imageUrl' como um item de uma lista temporária para manter o carrossel.
+    _images = [widget.quarto.imageUrl];
+    // Se você tiver uma lista de URLs no seu modelo Quarto (ex: widget.quarto.imageUrls), use:
+    // _images = widget.quarto.imageUrls.isNotEmpty ? widget.quarto.imageUrls : [widget.quarto.imageUrl];
+  }
+
+  // Função auxiliar para formatação manual de moeda
+  String _formatarMoeda(double valor) {
+    String valorString = valor.toStringAsFixed(2).replaceAll('.', ',');
+    return 'R\$ $valorString';
+  }
 
   @override
   Widget build(BuildContext context) {
+    // ⬅️ Dados dinâmicos
+    final Quarto quarto = widget.quarto;
+    final String precoFormatado = _formatarMoeda(quarto.preco);
+
     return Scaffold(
       backgroundColor: _backgroundColor,
       body: Stack(
@@ -32,18 +59,16 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
           // 1. CONTEÚDO COM SCROLL
           SingleChildScrollView(
             // Adiciona padding no fundo para o conteúdo não ficar atrás do rodapé fixo
-            padding: const EdgeInsets.only(bottom: 100), 
+            padding: const EdgeInsets.only(bottom: 100),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
                 // === CARROSSEL DE IMAGENS ===
                 Stack(
                   children: [
                     SizedBox(
                       height: 300,
                       child: PageView.builder(
-                        // controller: _pageController, 
                         onPageChanged: (index) {
                           setState(() {
                             _currentImageIndex = index;
@@ -58,30 +83,43 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                               if (loadingProgress == null) return child;
                               return Container(
                                 color: Colors.grey[200],
-                                child: const Center(child: CircularProgressIndicator(color: Color(0xFF0B2A4A))),
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF0B2A4A),
+                                  ),
+                                ),
                               );
                             },
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
                                 color: Colors.grey[300],
-                                child: const Icon(Icons.broken_image, color: Colors.grey, size: 50),
+                                child: const Icon(
+                                  Icons.broken_image,
+                                  color: Colors.grey,
+                                  size: 50,
+                                ),
                               );
                             },
                           );
                         },
                       ),
                     ),
-                    
+
                     // Gradiente Base
                     Positioned(
-                      bottom: 0, left: 0, right: 0,
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
                       child: Container(
                         height: 80,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
-                            colors: [Colors.black.withOpacity(0.6), Colors.transparent],
+                            colors: [
+                              Colors.black.withOpacity(0.6),
+                              Colors.transparent,
+                            ],
                           ),
                         ),
                       ),
@@ -95,13 +133,16 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(_images.length, (index) {
-                          return AnimatedContainer( // Animação suave na troca
+                          return AnimatedContainer(
+                            // Animação suave na troca
                             duration: const Duration(milliseconds: 300),
                             margin: const EdgeInsets.symmetric(horizontal: 4),
                             width: _currentImageIndex == index ? 22 : 8,
                             height: 8,
                             decoration: BoxDecoration(
-                              color: _currentImageIndex == index ? Colors.white : Colors.white.withOpacity(0.5),
+                              color: _currentImageIndex == index
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.5),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           );
@@ -109,19 +150,26 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       ),
                     ),
 
-                    // Contador de Fotos (Ex: 1/3) - Opcional, muito útil
+                    // Contador de Fotos (Ex: 1/1)
                     Positioned(
                       bottom: 20,
                       right: 20,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.6),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           "${_currentImageIndex + 1} / ${_images.length}",
-                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -142,7 +190,8 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                         children: [
                           Expanded(
                             child: Text(
-                              "Suíte Master com vista para a barragem Ceraíma",
+                              // ⬅️ DADOS DINÂMICOS: Título do Quarto
+                              quarto.tipo,
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
@@ -153,17 +202,24 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 10),
 
-                      // Avaliação
+                      // Avaliação (Mantido mock, pois não está no modelo Quarto)
                       Row(
                         children: [
-                          const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
+                          const Icon(
+                            Icons.star_rounded,
+                            color: Colors.amber,
+                            size: 20,
+                          ),
                           const SizedBox(width: 4),
                           Text(
-                            "4.8 (10 avaliações)", 
-                            style: TextStyle(fontWeight: FontWeight.w600, color: _textColor),
+                            "4.8 (10 avaliações)",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: _textColor,
+                            ),
                           ),
                           const Spacer(),
                         ],
@@ -173,13 +229,23 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       const Divider(height: 1),
                       const SizedBox(height: 25),
 
-                      // Detalhes (Camas/Banheiros)
+                      // Detalhes (Hóspedes / Banheiros)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _IconDetail(icon: Icons.bed_rounded, label: "2 Camas"),
-                          _IconDetail(icon: Icons.bathtub_outlined, label: "3 Banheiros"),
-                          _IconDetail(icon: Icons.square_foot_rounded, label: "80m²"),
+                          _IconDetail(
+                            icon: Icons.people_alt_rounded,
+                            // ⬅️ DADOS DINÂMICOS: Hóspedes
+                            label: "${quarto.capacidade} Hóspedes",
+                          ),
+                          _IconDetail(
+                            icon: Icons.bathtub_outlined,
+                            label: "3 Banheiros", // Mock
+                          ),
+                          _IconDetail(
+                            icon: Icons.square_foot_rounded,
+                            label: "80m²", // Mock
+                          ),
                         ],
                       ),
 
@@ -190,20 +256,36 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       // === O QUE ESSE LUGAR OFERECE ===
                       Text(
                         "O que esse lugar oferece",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _textColor),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: _textColor,
+                        ),
                       ),
                       const SizedBox(height: 15),
-                      
-                      // Lista de serviços em Grid/Wrap
+
+                      // Lista de serviços em Grid/Wrap (Mocked)
                       Wrap(
                         spacing: 10,
                         runSpacing: 10,
-                        children: [
+                        children: const [
                           _ServiceChip(icon: Icons.wifi, label: "Wifi Rápido"),
-                          _ServiceChip(icon: Icons.local_parking_rounded, label: "Estacionamento"),
-                          _ServiceChip(icon: Icons.pool_rounded, label: "Piscina"),
-                          _ServiceChip(icon: Icons.ac_unit_rounded, label: "Ar Condicionado"),
-                          _ServiceChip(icon: Icons.tv_rounded, label: "Smart TV"),
+                          _ServiceChip(
+                            icon: Icons.local_parking_rounded,
+                            label: "Estacionamento",
+                          ),
+                          _ServiceChip(
+                            icon: Icons.pool_rounded,
+                            label: "Piscina",
+                          ),
+                          _ServiceChip(
+                            icon: Icons.ac_unit_rounded,
+                            label: "Ar Condicionado",
+                          ),
+                          _ServiceChip(
+                            icon: Icons.tv_rounded,
+                            label: "Smart TV",
+                          ),
                         ],
                       ),
 
@@ -214,15 +296,21 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       // === DESCRIÇÃO ===
                       Text(
                         "Sobre a acomodação",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _textColor),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: _textColor,
+                        ),
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        "Desfrute de uma experiência única nesta suíte de luxo. Com vista panorâmica, "
-                        "decoração moderna e todo o conforto que você merece. Localização privilegiada "
-                        "próxima aos principais pontos turísticos.\n\n"
-                        "Ideal para casais ou pequenas famílias que buscam tranquilidade e sofisticação.",
-                        style: TextStyle(fontSize: 15, color: Colors.grey[600], height: 1.5),
+                        // ⬅️ DADOS DINÂMICOS: Descrição do Quarto
+                        quarto.descricao,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.grey[600],
+                          height: 1.5,
+                        ),
                       ),
                     ],
                   ),
@@ -262,9 +350,11 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                     color: Colors.black.withOpacity(0.08),
                     blurRadius: 20,
                     offset: const Offset(0, -5),
-                  )
+                  ),
                 ],
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
               ),
               child: SafeArea(
                 top: false,
@@ -277,7 +367,8 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "R\$ 1.600,50",
+                          // ⬅️ DADOS DINÂMICOS: Preço formatado
+                          precoFormatado,
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -286,17 +377,35 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                         ),
                         Text(
                           "/noite",
-                          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
                         ),
                       ],
                     ),
-                    
+
                     // Botão Reservar
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // Lógica para navegar para a próxima tela de reserva
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FazerReservaPage(
+                              // ⬅️ PASSANDO O SERVIÇO E O QUARTO
+                              reservaService: widget.reservaService,
+                              quarto: quarto,
+                            ),
+                          ),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _primaryColor,
-                        padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 25),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 35,
+                          vertical: 25,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
@@ -304,7 +413,11 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       ),
                       child: const Text(
                         "Reservar Agora",
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -319,7 +432,7 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
 }
 
 // =======================================================
-// WIDGETS AUXILIARES
+// WIDGETS AUXILIARES (DECORAÇÃO MANTIDA)
 // =======================================================
 
 // 1. Botão Circular Transparente (Topo)
@@ -368,7 +481,10 @@ class _IconDetail extends StatelessWidget {
           child: Icon(icon, size: 24, color: const Color(0xFF0B2A4A)),
         ),
         const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+        Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+        ),
       ],
     );
   }
@@ -394,7 +510,13 @@ class _ServiceChip extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: Colors.grey[700]),
           const SizedBox(width: 8),
-          Text(label, style: TextStyle(color: Colors.grey[800], fontWeight: FontWeight.w500)),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey[800],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ],
       ),
     );

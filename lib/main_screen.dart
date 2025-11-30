@@ -5,6 +5,9 @@ import 'pages/profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'servicos/auth_guard.dart';
 import 'pages/configuration_page.dart';
+import 'data/reserva_service.dart';
+import 'pages/listar_reservas.dart';
+import 'data/mock_reserva_service.dart';
 
 class MainScreen extends StatefulWidget {
   final int indexInicial;
@@ -16,12 +19,16 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+  static final ReservaService _reservaService = MockReservaService();
 
-  final List<Widget> _pages = const [
-    HomePage(), /* MENÚ: PÁGINA INICIAL */
-    ConfirmacaoReserva(),   /* MENÚ: QUARTOS */
-    ConfigurationPage(),    /* MENÚ: CONFIGURAÇÕES */
-    ProfilePage(),   /* MENÚ: PERFIL (caso não logado, redirecionar para LOGIN) */
+  final List<Widget> _pages = [
+    HomePage(reservaService: MockReservaService()),
+    /* MENÚ: PÁGINA INICIAL */
+    ListarReservasPage(reservaService: _reservaService),
+    /* MENÚ: QUARTOS */
+    ConfigurationPage(),
+    /* MENÚ: CONFIGURAÇÕES */
+    ProfilePage() /* MENÚ: PERFIL (caso não logado, redirecionar para LOGIN) */,
   ];
 
   @override
