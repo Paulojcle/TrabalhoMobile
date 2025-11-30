@@ -19,6 +19,9 @@ class _CadastroPageState extends State<CadastroPage> {
   final TextEditingController _senhaController = TextEditingController();
   final TextEditingController _confirmarSenhaController = TextEditingController();
 
+  // Cor principal do tema
+  final Color _primaryColor = const Color(0xFF0B2A4A);
+
   @override
   void dispose() {
     _nomeController.dispose();
@@ -30,203 +33,152 @@ class _CadastroPageState extends State<CadastroPage> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        elevation: 0,
-        backgroundColor: const Color(0xFFFFFFFF),
-        foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+        
+        // === CORREÇÃO DO APPBAR ===
+        backgroundColor: Colors.white, // Fundo branco
+        surfaceTintColor: Colors.transparent, // Remove a cor "estranha" do Material 3
+        elevation: 0, // Começa sem sombra
+        scrolledUnderElevation: 4.0, // Adiciona sombra suave ao rolar
+        shadowColor: Colors.black.withOpacity(0.5), // Define a cor da sombra (opcional)
+        // ==========================
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 40, right: 40),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Título Grande e Moderno
+              Text(
+                'Crie sua conta',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: _primaryColor,
+                  letterSpacing: -0.5,
+                ),
+              ),
               const SizedBox(height: 10),
-              const Center(
-                child: Text(
-                  'Bem vindo ao\nSleepWell!',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
+              Text(
+                'Preencha seus dados para começar a explorar.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
                 ),
               ),
               const SizedBox(height: 40),
 
-              // --- Campo Nome ---
-              const Padding(
-                padding: EdgeInsets.only(left: 20, bottom: 2),
-                child: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-              TextField(
+              // --- SEÇÃO 1: DADOS PESSOAIS ---
+              _buildSectionTitle("Dados Pessoais"),
+              const SizedBox(height: 20),
+              
+              _buildTextField(
+                label: "Nome",
                 controller: _nomeController,
-                decoration: _inputDecoration(),
+                icon: Icons.person_outline,
               ),
-              const SizedBox(height: 30),
-
-              // --- Campo Sobrenome ---
-              const Padding(
-                padding: EdgeInsets.only(left: 20, bottom: 2),
-                child: Text('Sobrenome', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-              TextField(
+              const SizedBox(height: 20),
+              _buildTextField(
+                label: "Sobrenome",
                 controller: _sobrenomeController,
-                decoration: _inputDecoration(),
+                icon: Icons.person_outline,
               ),
+
               const SizedBox(height: 30),
 
-              // --- Campo Email ---
-              const Padding(
-                padding: EdgeInsets.only(left: 20, bottom: 2),
-                child: Text('Email', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-              TextField(
+              // --- SEÇÃO 2: CONTATO ---
+              _buildSectionTitle("Contato"),
+              const SizedBox(height: 20),
+
+              _buildTextField(
+                label: "Email",
                 controller: _emailController,
-                decoration: _inputDecoration(),
+                icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
               ),
-              const SizedBox(height: 30),
-
-              // --- Campo Confirmar Email ---
-              const Padding(
-                padding: EdgeInsets.only(left: 20, bottom: 2),
-                child: Text('Confirmar Email', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-              TextField(
+              const SizedBox(height: 20),
+              _buildTextField(
+                label: "Confirmar Email",
                 controller: _confirmarEmailController,
-                decoration: _inputDecoration(),
+                icon: Icons.mark_email_read_outlined,
                 keyboardType: TextInputType.emailAddress,
               ),
+
               const SizedBox(height: 30),
 
-              // --- Campo Senha ---
-              const Padding(
-                padding: EdgeInsets.only(left: 20, bottom: 2),
-                child: Text('Senha', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
+              // --- SEÇÃO 3: SEGURANÇA ---
+              _buildSectionTitle("Segurança"),
+              const SizedBox(height: 20),
+
+              // Campo Senha
               TextField(
                 obscureText: _obscureSenha,
                 controller: _senhaController,
-                decoration: _inputDecoration().copyWith(
+                decoration: _inputDecoration("Senha", Icons.lock_outline).copyWith(
                   suffixIcon: IconButton(
-                    padding: const EdgeInsets.only(right: 20),
                     icon: Icon(
                       _obscureSenha ? Icons.visibility_off : Icons.visibility,
                       color: Colors.grey,
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _obscureSenha = !_obscureSenha;
-                      });
-                    },
+                    onPressed: () => setState(() => _obscureSenha = !_obscureSenha),
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
-              // --- Campo Confirmar Senha ---
-              const Padding(
-                padding: EdgeInsets.only(left: 20, bottom: 2),
-                child: Text('Confirmar Senha', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
+              // Campo Confirmar Senha
               TextField(
                 obscureText: _obscureConfirmarSenha,
                 controller: _confirmarSenhaController,
-                decoration: _inputDecoration().copyWith(
+                decoration: _inputDecoration("Confirmar Senha", Icons.lock_reset).copyWith(
                   suffixIcon: IconButton(
-                    padding: const EdgeInsets.only(right: 20),
                     icon: Icon(
                       _obscureConfirmarSenha ? Icons.visibility_off : Icons.visibility,
                       color: Colors.grey,
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _obscureConfirmarSenha = !_obscureConfirmarSenha;
-                      });
-                    },
+                    onPressed: () => setState(() => _obscureConfirmarSenha = !_obscureConfirmarSenha),
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
 
-              // Botão Cadastrar centralizado
-              Center(
+              const SizedBox(height: 50),
+
+              // BOTÃO CADASTRAR
+              SizedBox(
+                width: double.infinity,
+                height: 55,
                 child: ElevatedButton(
                   onPressed: () async {
-                    String nome = _nomeController.text.trim();
-                    String sobrenome = _sobrenomeController.text.trim();
-                    String email = _emailController.text.trim();
-                    String confirmarEmail = _confirmarEmailController.text.trim();
-                    String senha = _senhaController.text.trim();
-                    String confirmarSenha = _confirmarSenhaController.text.trim();
-
-                    if (nome.isEmpty || sobrenome.isEmpty || email.isEmpty || senha.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Preencha todos os campos!")),
-                      );
-                      return;
-                    }
-
-                    if (email != confirmarEmail) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Os emails não coincidem")),
-                      );
-                      return;
-                    }
-
-                    if (senha != confirmarSenha) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("As senhas não coincidem")),
-                      );
-                      return;
-                    }
-
-                    String? res = await AuthService().registerUser(
-                      nome: nome,
-                      sobrenome: sobrenome,
-                      email: email,
-                      senha: senha,
-                      cpf: '', 
-                      telefone: '', 
-                      dataNascimento: '',
-                      fotoUrl: null,
-                    );
-
-                    if (res != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(res)),
-                      );
-                    } else {
-                      // Cadastro bem-sucedido: redireciona para confirmação de cadastro 
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const ConfirmacaoCadastro()),
-                      );
-                    }
-
+                    _handleCadastro();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 25, 44, 80),
-                    minimumSize: const Size.fromHeight(60),
+                    backgroundColor: _primaryColor,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50),
+                      borderRadius: BorderRadius.circular(15),
                     ),
+                    elevation: 5,
+                    shadowColor: _primaryColor.withOpacity(0.3),
                   ),
                   child: const Text(
                     'Cadastrar',
                     style: TextStyle(
                       color: Colors.white,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -234,20 +186,101 @@ class _CadastroPageState extends State<CadastroPage> {
     );
   }
 
-  // --- Função para estilizar todos os campos ---
-  InputDecoration _inputDecoration() {
+  // === FUNÇÕES DE LÓGICA E UI ===
+
+  Future<void> _handleCadastro() async {
+    String nome = _nomeController.text.trim();
+    String sobrenome = _sobrenomeController.text.trim();
+    String email = _emailController.text.trim();
+    String confirmarEmail = _confirmarEmailController.text.trim();
+    String senha = _senhaController.text.trim();
+    String confirmarSenha = _confirmarSenhaController.text.trim();
+
+    if (nome.isEmpty || sobrenome.isEmpty || email.isEmpty || senha.isEmpty) {
+      _showSnackBar("Preencha todos os campos!");
+      return;
+    }
+
+    if (email != confirmarEmail) {
+      _showSnackBar("Os emails não coincidem");
+      return;
+    }
+
+    if (senha != confirmarSenha) {
+      _showSnackBar("As senhas não coincidem");
+      return;
+    }
+
+    String? res = await AuthService().registerUser(
+      nome: nome,
+      sobrenome: sobrenome,
+      email: email,
+      senha: senha,
+      cpf: '',
+      telefone: '',
+      dataNascimento: '',
+      fotoUrl: null,
+    );
+
+    if (res != null) {
+      _showSnackBar(res);
+    } else {
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const ConfirmacaoCadastro()),
+      );
+    }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+        color: Colors.grey[500],
+        letterSpacing: 1.2,
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      decoration: _inputDecoration(label, icon),
+    );
+  }
+
+  InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: Colors.grey[600]),
+      prefixIcon: Icon(icon, color: _primaryColor),
+      filled: true,
+      fillColor: Colors.grey[50],
+      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(50),
-        borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(50),
-        borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: Colors.grey[200]!),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(50),
-        borderSide: const BorderSide(color: Color.fromARGB(255, 0, 30, 54)),
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: _primaryColor, width: 1.5),
       ),
     );
   }

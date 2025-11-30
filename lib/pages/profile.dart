@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'alterar_senha_page.dart';
-
+import 'editar_perfil_page.dart';
 // ... (Class UserProfile permanece igual) ...
 class UserProfile {
   final String nome;
@@ -238,18 +238,47 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 40),
 
                     // === SEÇÃO DADOS PESSOAIS ===
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 10, bottom: 10),
-                        child: Text(
-                          'Dados Pessoais',
-                          style: TextStyle(
-                            fontSize: 20, 
-                            color: _primaryColor, 
-                            fontWeight: FontWeight.bold
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Dados Pessoais',
+                            style: TextStyle(
+                              fontSize: 20, 
+                              color: _primaryColor, 
+                              fontWeight: FontWeight.bold
+                            ),
                           ),
-                        ),
+                          
+                          // BOTÃO EDITAR
+                          TextButton.icon(
+                            onPressed: () async {
+                              // Navega para a tela de edição e espera o retorno
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditarPerfilPage(perfilAtual: userProfile),
+                                ),
+                              );
+
+                              // Se retornou 'true' (salvou), recarrega os dados
+                              if (result == true) {
+                                setState(() {
+                                  _profileFuture = _fetchUserProfile(firebaseUser!.uid);
+                                });
+                              }
+                            },
+                            icon: Icon(Icons.edit_rounded, size: 18, color: _primaryColor),
+                            label: Text("Editar", style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold)),
+                            style: TextButton.styleFrom(
+                              backgroundColor: _primaryColor.withOpacity(0.1),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     

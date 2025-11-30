@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../servicos/auth_service.dart';
+import 'sobre_app_page.dart';
 
 class ConfigurationPage extends StatefulWidget {
   const ConfigurationPage({super.key});
@@ -295,7 +296,12 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
               icon: Icons.info_outline_rounded,
               text: "Sobre o App",
               color: _primaryColor,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SobreAppPage()),
+                );
+              },
             ),
 
             if (_isLoggedIn) ...[
