@@ -7,7 +7,6 @@ import 'servicos/auth_guard.dart';
 import 'pages/configuration_page.dart';
 import 'data/reserva_service.dart';
 import 'pages/listar_reservas.dart';
-import 'data/mock_reserva_service.dart';
 
 class MainScreen extends StatefulWidget {
   final int indexInicial;
@@ -19,25 +18,35 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  static final ReservaService _reservaService = MockReservaService();
 
-  final List<Widget> _pages = [
-    HomePage(reservaService: MockReservaService()),
-    /* MENÚ: PÁGINA INICIAL */
-    ListarReservasPage(reservaService: _reservaService),
-    /* MENÚ: QUARTOS */
-    ConfigurationPage(),
-    /* MENÚ: CONFIGURAÇÕES */
-    ProfilePage() /* MENÚ: PERFIL (caso não logado, redirecionar para LOGIN) */,
-  ];
+  // 1. Criamos a instância do serviço REAL aqui
+  final ReservaService _reservaService = ReservaService();
+
+  // A lista de páginas precisa ser 'late' para acessar a variável _reservaService acima
+  late final List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
-    _selectedIndex = widget.indexInicial; // inicializa com o índice recebido
+    _selectedIndex = widget.indexInicial;
+
+    // 2. Inicializamos a lista aqui para injetar o serviço corretamente
+    _pages = [
+      HomePage(reservaService: _reservaService), 
+      
+      /* MENÚ: MINHAS RESERVAS */
+      ListarReservasPage(reservaService: _reservaService),
+      
+      /* MENÚ: CONFIGURAÇÕES */
+      ConfigurationPage(),
+      
+      /* MENÚ: PERFIL */
+      ProfilePage(),
+    ];
   }
 
   void _onItemTapped(int index) async {
+    // Bloqueio de segurança para a aba Perfil (index 3)
     if (index == 3) {
       bool permitido = await requireLogin(context);
       if (!permitido) return;
@@ -52,20 +61,19 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // Mostra a página atual com base no _selectedIndex
+      // Como inicializamos _pages no initState, podemos usar sem problemas
       body: _pages[_selectedIndex],
 
-      // Menu inferior fixo em todas as páginas
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Color(0xFF192C50),
-        unselectedItemColor: Color(0xFFC1C1C1),
+        selectedItemColor: const Color(0xFF192C50),
+        unselectedItemColor: const Color(0xFFC1C1C1),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
-          BottomNavigationBarItem(icon: Icon(Icons.hotel), label: 'Quartos'),
+          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: 'Reservas'), 
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Config.'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
         ],

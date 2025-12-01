@@ -17,6 +17,8 @@ class MockReservaService implements ReservaService {
       descricao: 'Vista panorâmica e banheira de hidromassagem.',
       // ATENÇÃO: Adicione maxHospedes/capacidade para a correção anterior funcionar!
       capacidade: 4,
+      camas: 2,
+      banheiros: 2,
       disponivel: true,
       avaliacao: 4.5,
       imageUrl:
@@ -28,6 +30,8 @@ class MockReservaService implements ReservaService {
       preco: 280.0,
       descricao: 'Espaçoso, ideal para famílias grandes.',
       capacidade: 5,
+      camas: 2,
+      banheiros: 2,
       disponivel: true,
       avaliacao: 4.8,
       imageUrl:
