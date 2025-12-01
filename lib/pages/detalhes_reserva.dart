@@ -34,12 +34,12 @@ class _DetalhesReservaPageState extends State<DetalhesReservaPage> {
   }
 
   Future<(Reserva, Quarto)> _carregarDetalhes() async {
+    // 1. Busca a reserva
     final reserva = await widget.reservaService.buscarReservaPorId(widget.reservaID);
-    final quartos = await widget.reservaService.buscarTodosQuartos();
-    final quarto = quartos.firstWhere(
-      (q) => q.id == reserva.quartoId,
-      orElse: () => throw Exception('Quarto não encontrado.'),
-    );
+    
+    // 2. Busca o quarto específico (mesmo que esteja ocupado)
+    final quarto = await widget.reservaService.buscarQuartoPorId(reserva.quartoId);
+    
     return (reserva, quarto);
   }
 
@@ -183,7 +183,7 @@ class _DetalhesReservaPageState extends State<DetalhesReservaPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           _buildInfoRow(Icons.people_alt_rounded, "${reserva.numHospedes} Hóspedes"),
-                          _buildInfoRow(Icons.confirmation_number_rounded, "ID: ...${reserva.id.substring(reserva.id.length - 4)}"),
+                          _buildInfoRow(Icons.confirmation_number_rounded, "ID: #${reserva.id}"),
                         ],
                       )
                     ],

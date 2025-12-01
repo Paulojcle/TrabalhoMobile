@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hotel_app/pages/detalhes_quarto.dart';
 import '../models/quarto.dart';
-import '../data/reserva_service.dart'; // Import necessário
+import '../data/reserva_service.dart';
 
-// 1. MUDANÇA: Transformar em StatefulWidget e receber o ReservaService
 class HomePage extends StatefulWidget {
-  final ReservaService reservaService; // Injeção de Dependência
+  final ReservaService reservaService;
 
   const HomePage({super.key, required this.reservaService});
 
@@ -17,26 +16,23 @@ class _HomePageState extends State<HomePage> {
   final Color _primaryColor = const Color(0xFF0B2A4A);
   final Color _backgroundColor = const Color(0xFFF8F9FA);
 
-  // 2. ESTADO: Variáveis para gerenciar os dados da API
+  // Variáveis de Estado
   List<Quarto>? _quartos;
   bool _isLoading = true;
   String? _errorMessage;
 
-  // 3. CICLO DE VIDA: Buscar dados ao iniciar a tela
   @override
   void initState() {
     super.initState();
     _fetchQuartos();
   }
 
-  // 4. MÉTODO DE BUSCA DA API
   Future<void> _fetchQuartos() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
     try {
-      // Chama o serviço injetado para buscar a lista de quartos
       final quartosDaApi = await widget.reservaService.buscarTodosQuartos();
       setState(() {
         _quartos = quartosDaApi;
@@ -44,22 +40,21 @@ class _HomePageState extends State<HomePage> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = "Falha ao carregar quartos. Tente novamente.";
+        _errorMessage = "Falha ao carregar quartos. Verifique a conexão.";
         _isLoading = false;
-        _quartos = []; // Garante que a lista não é nula em caso de erro
+        _quartos = [];
       });
-      print("Erro ao buscar quartos: $e");
+      print("Erro: $e");
     }
   }
 
-  // Função auxiliar para formatação manual de moeda
   String _formatarMoeda(double valor) {
     String valorString = valor.toStringAsFixed(2).replaceAll('.', ',');
     return 'R\$ $valorString';
   }
 
   // =======================================================
-  // 1. LÓGICA DO MODAL DE NOTIFICAÇÕES
+  // 1. MODAL DE NOTIFICAÇÕES (Visual Mantido)
   // =======================================================
   void _openNotificationModal(BuildContext context) {
     showModalBottomSheet(
@@ -75,7 +70,6 @@ class _HomePageState extends State<HomePage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Barrinha cinza no topo (indicador de arraste)
               Center(
                 child: Container(
                   width: 40,
@@ -92,7 +86,6 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 15),
-              // Lista de Notificações Fake
               Expanded(
                 child: ListView(
                   children: [
@@ -128,10 +121,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   // =======================================================
-  // 2. LÓGICA DO MODAL DE FILTROS
+  // 2. MODAL DE FILTROS (Visual Mantido)
   // =======================================================
   void _openFilterModal(BuildContext context) {
-    // Valores iniciais
     int camas = 1;
     int banheiros = 1;
 
@@ -142,7 +134,6 @@ class _HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
       ),
       builder: (context) {
-        // StatefulBuilder permite atualizar a tela DENTRO do modal
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setStateModal) {
             return Padding(
@@ -167,8 +158,6 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 30),
-
-                  // CONTADOR DE CAMAS
                   _buildCounterRow(
                     label: "Camas",
                     value: camas,
@@ -179,12 +168,9 @@ class _HomePageState extends State<HomePage> {
                       setStateModal(() => camas++);
                     },
                   ),
-
                   const SizedBox(height: 20),
                   const Divider(height: 1),
                   const SizedBox(height: 20),
-
-                  // CONTADOR DE BANHEIROS
                   _buildCounterRow(
                     label: "Banheiros",
                     value: banheiros,
@@ -195,19 +181,14 @@ class _HomePageState extends State<HomePage> {
                       setStateModal(() => banheiros++);
                     },
                   ),
-
                   const SizedBox(height: 40),
-
-                  // BOTÃO DE APLICAR
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context); // Fecha o modal
-                        print(
-                          "Filtros aplicados: Camas: $camas, Banheiros: $banheiros",
-                        );
+                        Navigator.pop(context);
+                        // Aqui você implementaria a lógica de filtrar a lista _quartos
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _primaryColor,
@@ -234,7 +215,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Helper para desenhar a linha do contador (+ 1 -)
   Widget _buildCounterRow({
     required String label,
     required int value,
@@ -313,7 +293,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 20),
-            // BARRA DE PESQUISA COM BOTÃO DE FILTRO
+            // Barra de Pesquisa
             Container(
               height: 55,
               decoration: BoxDecoration(
@@ -355,7 +335,7 @@ class _HomePageState extends State<HomePage> {
 
             const SizedBox(height: 30),
 
-            // TÍTULO DA SEÇÃO
+            // Título Seção
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -379,7 +359,7 @@ class _HomePageState extends State<HomePage> {
 
             const SizedBox(height: 10),
 
-            // 5. LÓGICA DE EXIBIÇÃO: Carregamento, Erro ou Lista
+            // Lógica de Exibição da Lista
             if (_isLoading)
               const Center(
                 child: Padding(
@@ -413,7 +393,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               )
             else
-              // 6. LISTA DINÂMICA
+              // LISTA REAL CONECTADA AO DESIGN
               ListView.separated(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
@@ -425,25 +405,28 @@ class _HomePageState extends State<HomePage> {
                   String precoFormatado = _formatarMoeda(quarto.preco);
 
                   return _HotelCard(
-                    // Usa a URL real do Quarto (ou fallback)
-                    imageUrl: quarto.imageUrl.isNotEmpty
-                        ? quarto.imageUrl
-                        : '', // Fallback para asset local
+                    // 1. Imagem
+                    imageUrl: (quarto.imageUrl != null && quarto.imageUrl!.isNotEmpty)
+                        ? quarto.imageUrl!
+                        : 'assets/quarto.png', 
+                    // 2. Tipo do Quarto
                     title: quarto.tipo,
-                    rating: '4.8', // Mock se não estiver no Model
-                    guests: quarto.capacidade.toString(),
-                    beds: '2', // Mock se não estiver no Model
+                    // 3. Avaliação
+                    rating: quarto.avaliacao.toString(),
+                    // 4. Capacidade
+                    guests: "${quarto.capacidade} Pessoas",
+                    // 5. Camas
+                    beds: "${quarto.camas} Camas",
+                    // 6. Preço Formatado
                     price: precoFormatado,
                     primaryColor: _primaryColor,
                     onTap: () {
-                      // ⬅️ CORREÇÃO CRÍTICA: Passa os argumentos corretos
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => DetalhesQuartoPage(
                             quarto: quarto,
-                            reservaService:
-                                widget.reservaService, // Usa o serviço injetado
+                            reservaService: widget.reservaService,
                           ),
                         ),
                       );
@@ -461,10 +444,9 @@ class _HomePageState extends State<HomePage> {
 }
 
 // =======================================================
-// WIDGETS AUXILIARES (DECORAÇÃO MANTIDA)
+// WIDGETS AUXILIARES (Design Intacto)
 // =======================================================
 
-// 1. CARD DE HOTEL (_HotelCard) - Alterado Image.asset para Image.network com fallback
 class _HotelCard extends StatelessWidget {
   final String imageUrl;
   final String title;
@@ -528,7 +510,6 @@ class _HotelCard extends StatelessWidget {
                               ),
                             );
                           },
-                          // Fallback se a imagem da rede falhar
                           errorBuilder: (c, e, s) => Image.asset(
                             'assets/quarto.png',
                             height: 180,
@@ -536,7 +517,6 @@ class _HotelCard extends StatelessWidget {
                             fit: BoxFit.cover,
                           ),
                         )
-                      // Se for um caminho de asset local (ex: 'assets/quarto.png')
                       : Image.asset(
                           imageUrl,
                           height: 180,
@@ -660,7 +640,6 @@ class _HotelCard extends StatelessWidget {
   }
 }
 
-// 2. ITEM DE NOTIFICAÇÃO (_NotificationItem)
 class _NotificationItem extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -722,7 +701,6 @@ class _NotificationItem extends StatelessWidget {
   }
 }
 
-// 3. BOTÃO REDONDO (_RoundButton)
 class _RoundButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;

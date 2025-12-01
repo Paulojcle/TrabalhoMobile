@@ -31,6 +31,7 @@ class _CancelarReservaState extends State<CancelarReserva> {
 
       if (mounted) {
         // Sucesso: Retorna para a tela inicial limpando a pilha
+        // Isso garante que o usuário não volte para uma tela de detalhes de algo que não existe mais
         Navigator.of(context).popUntil((route) => route.isFirst);
         
         ScaffoldMessenger.of(context).showSnackBar(
@@ -115,10 +116,13 @@ class _CancelarReservaState extends State<CancelarReserva> {
                   style: TextStyle(fontSize: 16, color: Colors.grey[600], height: 1.5),
                   children: [
                     const TextSpan(text: "Você está prestes a cancelar a reserva\n"),
+                    
+                    // ⚠️ CORREÇÃO AQUI: Removemos o .substring perigoso
                     TextSpan(
-                      text: "ID: ...${widget.reservaID.substring(widget.reservaID.length - 6)}", // Mostra só o final do ID
+                      text: "ID: #${widget.reservaID}", 
                       style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
                     ),
+                    
                     const TextSpan(text: ".\nEssa ação é irreversível."),
                   ],
                 ),

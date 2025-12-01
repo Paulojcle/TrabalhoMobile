@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'fazer_reserva.dart';
+import 'fazer_reserva.dart'; 
 import '../data/reserva_service.dart';
 import '../models/quarto.dart';
-import '../servicos/auth_guard.dart';
+import '../servicos/auth_guard.dart'; 
 
 class DetalhesQuartoPage extends StatefulWidget {
   final Quarto quarto;
   final ReservaService reservaService;
+  
   const DetalhesQuartoPage({
     super.key,
     required this.quarto,
@@ -26,19 +27,18 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
   final Color _backgroundColor = const Color(0xFFF8F9FA);
   final Color _textColor = const Color(0xFF333333);
 
-  // Lista de imagens (Usando a URL do quarto, mas mantendo a lista para o carrossel.
-  // Se o seu model 'Quarto' não tem uma lista de URLs, usaremos apenas a 'imageUrl')
   late final List<String> _images;
 
   @override
   void initState() {
     super.initState();
-    // Se o seu modelo Quarto tiver uma lista de imagens (imageUrls), use-a.
-    // Caso contrário, usamos a imageUrl como uma lista de um item para o PageView.
-    // Estou usando a 'imageUrl' como um item de uma lista temporária para manter o carrossel.
-    _images = [widget.quarto.imageUrl];
-    // Se você tiver uma lista de URLs no seu modelo Quarto (ex: widget.quarto.imageUrls), use:
-    // _images = widget.quarto.imageUrls.isNotEmpty ? widget.quarto.imageUrls : [widget.quarto.imageUrl];
+    // Prepara a lista de imagens. 
+    // Se a string da imagem vier vazia ou nula, usamos um placeholder para não travar o app.
+    String img = (widget.quarto.imageUrl != null && widget.quarto.imageUrl!.isNotEmpty)
+        ? widget.quarto.imageUrl!
+        : 'https://via.placeholder.com/400x300';
+        
+    _images = [img];
   }
 
   // Função auxiliar para formatação manual de moeda
@@ -49,7 +49,6 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
 
   @override
   Widget build(BuildContext context) {
-    // ⬅️ Dados dinâmicos
     final Quarto quarto = widget.quarto;
     final String precoFormatado = _formatarMoeda(quarto.preco);
 
@@ -59,7 +58,6 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
         children: [
           // 1. CONTEÚDO COM SCROLL
           SingleChildScrollView(
-            // Adiciona padding no fundo para o conteúdo não ficar atrás do rodapé fixo
             padding: const EdgeInsets.only(bottom: 100),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,7 +133,6 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(_images.length, (index) {
                           return AnimatedContainer(
-                            // Animação suave na troca
                             duration: const Duration(milliseconds: 300),
                             margin: const EdgeInsets.symmetric(horizontal: 4),
                             width: _currentImageIndex == index ? 22 : 8,
@@ -151,7 +148,7 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       ),
                     ),
 
-                    // Contador de Fotos (Ex: 1/1)
+                    // Contador de Fotos
                     Positioned(
                       bottom: 20,
                       right: 20,
@@ -185,14 +182,13 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Título e Nota
+                      // Título
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Text(
-                              // ⬅️ DADOS DINÂMICOS: Título do Quarto
-                              quarto.tipo,
+                              quarto.tipo, // ⬅️ DADO REAL
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
@@ -206,7 +202,7 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
 
                       const SizedBox(height: 10),
 
-                      // Avaliação (Mantido mock, pois não está no modelo Quarto)
+                      // Avaliação
                       Row(
                         children: [
                           const Icon(
@@ -216,7 +212,7 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            "4.8 (10 avaliações)",
+                            "${quarto.avaliacao} (Classificação)", // ⬅️ DADO REAL
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               color: _textColor,
@@ -230,22 +226,21 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       const Divider(height: 1),
                       const SizedBox(height: 25),
 
-                      // Detalhes (Hóspedes / Banheiros)
+                      // Detalhes (Capacidade real, outros fixos)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           _IconDetail(
                             icon: Icons.people_alt_rounded,
-                            // ⬅️ DADOS DINÂMICOS: Hóspedes
-                            label: "${quarto.capacidade} Hóspedes",
+                            label: "${quarto.capacidade} Hóspedes", 
                           ),
                           _IconDetail(
                             icon: Icons.bathtub_outlined,
-                            label: "3 Banheiros", // Mock
+                            label: "${quarto.banheiros} Banheiros",
                           ),
                           _IconDetail(
-                            icon: Icons.square_foot_rounded,
-                            label: "80m²", // Mock
+                            icon: Icons.bed_rounded,
+                            label: "${quarto.camas} Camas",
                           ),
                         ],
                       ),
@@ -255,6 +250,7 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       const SizedBox(height: 25),
 
                       // === O QUE ESSE LUGAR OFERECE ===
+                      // (Mantido fixo pois o Model Quarto não tem lista de services ainda)
                       Text(
                         "O que esse lugar oferece",
                         style: TextStyle(
@@ -265,19 +261,14 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       ),
                       const SizedBox(height: 15),
 
-                      // Lista de serviços em Grid/Wrap (Mocked)
                       Wrap(
                         spacing: 10,
                         runSpacing: 10,
                         children: const [
-                          _ServiceChip(icon: Icons.wifi, label: "Wifi Rápido"),
+                          _ServiceChip(icon: Icons.wifi, label: "Wifi Grátis"),
                           _ServiceChip(
                             icon: Icons.local_parking_rounded,
                             label: "Estacionamento",
-                          ),
-                          _ServiceChip(
-                            icon: Icons.pool_rounded,
-                            label: "Piscina",
                           ),
                           _ServiceChip(
                             icon: Icons.ac_unit_rounded,
@@ -285,7 +276,7 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                           ),
                           _ServiceChip(
                             icon: Icons.tv_rounded,
-                            label: "Smart TV",
+                            label: "TV a Cabo",
                           ),
                         ],
                       ),
@@ -305,8 +296,7 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        // ⬅️ DADOS DINÂMICOS: Descrição do Quarto
-                        quarto.descricao,
+                        quarto.descricao, // ⬅️ DADO REAL
                         style: TextStyle(
                           fontSize: 15,
                           color: Colors.grey[600],
@@ -320,7 +310,7 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
             ),
           ),
 
-          // 2. BOTÕES FLUTUANTES SUPERIORES (Voltar e Favoritar)
+          // 2. BOTÕES FLUTUANTES SUPERIORES
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             left: 20,
@@ -328,7 +318,6 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Botão Voltar
                 _CircleButton(
                   icon: Icons.arrow_back,
                   onTap: () => Navigator.pop(context),
@@ -337,7 +326,7 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
             ),
           ),
 
-          // 3. RODAPÉ FIXO (PREÇO + RESERVAR)
+          // 3. RODAPÉ FIXO
           Positioned(
             bottom: 0,
             left: 0,
@@ -368,8 +357,7 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          // ⬅️ DADOS DINÂMICOS: Preço formatado
-                          precoFormatado,
+                          precoFormatado, // ⬅️ DADO REAL
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -388,24 +376,21 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
 
                     // Botão Reservar
                     ElevatedButton(
-                      // TRANSFORME O onPressed EM ASYNC
-                      onPressed: () async { 
-                        
-                        // 1. VERIFICA LOGIN
+                      onPressed: () async {
+                        // Lógica de Autenticação
                         bool isLoggedIn = await requireLogin(context);
                         
-                        // 2. SE NÃO ESTIVER LOGADO, PARA AQUI (requireLogin já redirecionou)
-                        if (!isLoggedIn) return;
+                        if (!isLoggedIn) return; // Se não logou, para.
 
-                        // 3. SE ESTIVER LOGADO, CONTINUA COM A RESERVA
-                        if (!mounted) return; // Checagem de segurança do Flutter
+                        if (!mounted) return;
                         
+                        // Navega para a tela de fazer reserva
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => FazerReservaPage(
                               reservaService: widget.reservaService,
-                              quarto: widget.quarto, // Use 'widget.quarto' aqui
+                              quarto: widget.quarto,
                             ),
                           ),
                         );
@@ -421,9 +406,9 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
-                        "Reservar Agora",
-                        style: TextStyle(
+                      child: Text(
+                        quarto.disponivel ? "Reservar Agora" : "Indisponível",
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -442,10 +427,9 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
 }
 
 // =======================================================
-// WIDGETS AUXILIARES (DECORAÇÃO MANTIDA)
+// WIDGETS AUXILIARES
 // =======================================================
 
-// 1. Botão Circular Transparente (Topo)
 class _CircleButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
@@ -471,7 +455,6 @@ class _CircleButton extends StatelessWidget {
   }
 }
 
-// 2. Detalhe com Ícone (Cama, Banheiro)
 class _IconDetail extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -500,7 +483,6 @@ class _IconDetail extends StatelessWidget {
   }
 }
 
-// 3. Chip de Serviço (Wifi, Piscina)
 class _ServiceChip extends StatelessWidget {
   final IconData icon;
   final String label;

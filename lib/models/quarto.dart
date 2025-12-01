@@ -1,13 +1,13 @@
-// lib/models/quarto.dart (Exemplo de Modelo Mínimo)
-
 class Quarto {
   final String id;
-  final String tipo; // ⬅️ GARANTIR QUE ESTE CAMPO EXISTA
+  final String tipo;
   final double preco;
   final String descricao;
   final int capacidade;
+  final int camas;
+  final int banheiros;
   final bool disponivel;
-  final String imageUrl;
+  final String? imageUrl; // ⚠️ Mudança importante: Pode vir nulo do Django
   final double avaliacao;
 
   const Quarto({
@@ -16,8 +16,35 @@ class Quarto {
     required this.preco,
     required this.descricao,
     required this.capacidade,
-    required this.imageUrl,
+    required this.camas,
+    required this.banheiros,
+    this.imageUrl, // Opcional
     required this.avaliacao,
     this.disponivel = true,
   });
+
+  // Fábrica para converter o JSON do Django para o Objeto Dart
+  factory Quarto.fromJson(Map<String, dynamic> json) {
+    return Quarto(
+      // Django envia 'numero' (int), Flutter quer String 'id'
+      id: json['numero'].toString(),
+      
+      tipo: json['tipo'] ?? 'Padrão',
+      
+      // Django envia 'preco_diaria' (string/decimal), Flutter quer double
+      preco: double.tryParse(json['preco_diaria'].toString()) ?? 0.0,
+      
+      // Mapeando nomes diferentes
+      descricao: json['descricao_detalhada'] ?? '',
+      capacidade: json['capacidade'] ?? 0,
+      camas: json['camas'] ?? 0,
+      banheiros: json['banheiros'] ?? 0,
+      
+      // Se não tiver imagem, enviamos null
+      imageUrl: json['imagens'], 
+      
+      avaliacao: double.tryParse(json['avaliacao'].toString()) ?? 0.0,
+      disponivel: json['disponibilidade'] ?? true,
+    );
+  }
 }
