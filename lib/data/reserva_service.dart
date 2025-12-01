@@ -1,24 +1,55 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart'; // Para kIsWeb
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart'; // Importante para o Token
 import '../models/quarto.dart';
-import '../models/reserva.dart'; // ⚠️ Certifique-se de ter este modelo criado!
+import '../models/reserva.dart';
+import '../models/hospede.dart';
 
 class ReservaService {
-  // Use 10.0.2.2 para emulador Android.
-  // Se for celular físico, use o IP do seu PC (ex: 192.168.1.5).
-  static const String baseUrl = 'http://localhost:8000';
+  
+  // ===========================================================================
+  // 1. CONFIGURAÇÃO DE URL (IP Dinâmico)
+  // ===========================================================================
+  static String get baseUrl {
+    if (kIsWeb) return 'http://localhost:8000';
+    // Se for emulador Android
+    if (!kIsWeb && Platform.isAndroid) return 'http://10.0.2.2:8000'; 
+    // Se for celular físico (troque pelo seu IP do ipconfig)
+    return 'http://192.168.0.106:8000'; 
+  }
 
   // ===========================================================================
-  // 1. BUSCAR TODOS OS QUARTOS (Usado na Home)
+  // 2. HELPER DE SEGURANÇA (O método que faltava!)
+  // ===========================================================================
+  Future<Map<String, String>> _getHeaders() async {
+    // Pega o usuário logado no App
+    User? user = FirebaseAuth.instance.currentUser;
+    
+    // Tenta pegar o token JWT atual
+    String? token = await user?.getIdToken();
+
+    return {
+      "Content-Type": "application/json",
+      // Se tiver token, envia no formato Bearer. Se não, não envia.
+      if (token != null) "Authorization": "Bearer $token",
+    };
+  }
+
+  // ===========================================================================
+  // 3. BUSCAR TODOS OS QUARTOS (Público ou Protegido)
   // ===========================================================================
   Future<List<Quarto>> buscarTodosQuartos() async {
     try {
+      // Se quiser proteger essa rota também, use _getHeaders(). 
+      // Por enquanto, vou deixar público (headers vazio ou só json).
       final response = await http.get(Uri.parse('$baseUrl/api/quartos/'));
 
       if (response.statusCode == 200) {
         List<dynamic> body = json.decode(response.body);
         return body.map((item) {
-          _corrigirUrlImagem(item); // Ajuste técnico para imagem
+          _corrigirUrlImagem(item);
           return Quarto.fromJson(item);
         }).toList();
       } else {
@@ -31,14 +62,12 @@ class ReservaService {
   }
 
   // ===========================================================================
-  // 2. BUSCAR QUARTOS DISPONÍVEIS (Por data)
+  // 4. BUSCAR DISPONIBILIDADE
   // ===========================================================================
   Future<List<Quarto>> buscarQuartosDisponiveis(DateTime dataEntrada, DateTime dataSaida) async {
-    // Formata datas para YYYY-MM-DD
     String entrada = dataEntrada.toIso8601String().split('T')[0];
     String saida = dataSaida.toIso8601String().split('T')[0];
 
-    // O Django deve estar preparado para receber ?checkin=...&checkout=...
     final uri = Uri.parse('$baseUrl/api/quartos/').replace(queryParameters: {
       'checkin': entrada,
       'checkout': saida,
@@ -63,19 +92,25 @@ class ReservaService {
   }
 
   // ===========================================================================
-  // 3. BUSCAR MINHAS RESERVAS
+  // 5. BUSCAR MINHAS RESERVAS (Protegido)
   // ===========================================================================
   Future<List<Reserva>> buscarMinhasReservas(String clienteId) async {
     try {
-      // Filtra reservas pelo ID do cliente (Django filter)
-      final response = await http.get(Uri.parse('$baseUrl/api/reservas/?cliente=$clienteId'));
+      // Aqui usamos o _getHeaders porque é dado sensível do usuário
+      final headers = await _getHeaders();
+
+      // No Django, você vai precisar filtrar isso. 
+      // Se o Django usar o Token para saber quem é o usuário, nem precisa passar ?cliente=ID na URL.
+      // Mas vamos manter a estrutura atual:
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/reservas/?cliente=$clienteId/'),
+        headers: headers,
+      );
 
       if (response.statusCode == 200) {
         List<dynamic> body = json.decode(response.body);
-        // ATENÇÃO: Seu modelo Reserva precisa ter o método .fromJson
         return body.map((item) => Reserva.fromJson(item)).toList();
       } else {
-        // Se der 404 ou lista vazia, retornamos lista vazia sem erro
         return [];
       }
     } catch (e) {
@@ -85,11 +120,15 @@ class ReservaService {
   }
 
   // ===========================================================================
-  // 4. BUSCAR RESERVA POR ID
+  // 6. BUSCAR RESERVA POR ID (Protegido)
   // ===========================================================================
   Future<Reserva> buscarReservaPorId(String id) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/api/reservas/$id/'));
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/reservas/$id/'),
+        headers: headers,
+      );
 
       if (response.statusCode == 200) {
         return Reserva.fromJson(json.decode(response.body));
@@ -102,49 +141,86 @@ class ReservaService {
   }
 
   // ===========================================================================
-  // 5. CRIAR NOVA RESERVA
+  // 7. SALVAR HÓSPEDE (Protegido com Token)
   // ===========================================================================
-  Future<String> criarNovaReserva(Reserva reserva) async {
+  Future<String> salvarHospede(Hospede hospede) async {
     try {
+      final url = Uri.parse('$baseUrl/api/hospedes/');
+      
+      // ⚠️ AQUI ESTAVA O ERRO ANTES: Chamando a função _getHeaders
+      final headers = await _getHeaders(); 
+
+      final response = await http.post(
+        url,
+        headers: headers, // Envia o Token
+        body: json.encode(hospede.toJson()),
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final body = json.decode(response.body);
+        return body['id'].toString();
+      } else {
+        throw Exception('Erro API (${response.statusCode}): ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erro ao salvar hóspede: $e');
+    }
+  }
+
+  // ===========================================================================
+  // 8. CRIAR NOVA RESERVA (Protegido com Token)
+  // ===========================================================================
+  Future<String> criarNovaReserva(Reserva reserva, Hospede dadosHospede) async {
+    try {
+      // 1. Salva Hóspede (Já usa token internamente)
+      String clienteIdDjango = await salvarHospede(dadosHospede);
+
+      // 2. Atualiza objeto
+      Reserva reservaFinal = reserva.copyWith(clienteId: clienteIdDjango);
+
+      // 3. Prepara Headers com Token
+      final headers = await _getHeaders();
+
+      // 4. Envia
       final response = await http.post(
         Uri.parse('$baseUrl/api/reservas/'),
-        headers: {"Content-Type": "application/json"},
-        // ATENÇÃO: Seu modelo Reserva precisa ter o método .toJson
-        body: json.encode(reserva.toJson()),
+        headers: headers,
+        body: json.encode(reservaFinal.toJson()),
       );
 
       if (response.statusCode == 201) {
         final body = json.decode(response.body);
-        // Retorna o ID da reserva criada (ajuste a chave 'id' conforme seu JSON)
         return body['id'].toString(); 
       } else {
         throw Exception('Falha ao criar reserva: ${response.body}');
       }
     } catch (e) {
-      throw Exception('Erro de conexão ao criar reserva: $e');
+      throw Exception('Erro no processo de reserva: $e');
     }
   }
 
   // ===========================================================================
-  // 6. CANCELAR RESERVA
+  // 9. CANCELAR RESERVA (Protegido)
   // ===========================================================================
   Future<void> cancelarReserva(String reservaId) async {
     try {
-      // Tenta deletar a reserva
-      final response = await http.delete(Uri.parse('$baseUrl/api/reservas/$reservaId/'));
+      final headers = await _getHeaders();
+      final response = await http.delete(
+        Uri.parse('$baseUrl/api/reservas/$reservaId/'),
+        headers: headers,
+      );
 
-      // 204 = No Content (Sucesso na deleção) ou 200 = OK
       if (response.statusCode == 204 || response.statusCode == 200) {
-        return; // Sucesso
+        return;
       } else {
-        throw Exception('Não foi possível cancelar: ${response.statusCode}');
+        throw Exception('Erro ao cancelar: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Erro ao cancelar reserva: $e');
     }
   }
 
-  // --- Helper para corrigir URL de imagens ---
+  // --- Helper visual ---
   void _corrigirUrlImagem(Map<String, dynamic> item) {
     if (item['imagens'] != null && !item['imagens'].toString().startsWith('http')) {
       item['imagens'] = '$baseUrl${item['imagens']}';

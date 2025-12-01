@@ -183,7 +183,7 @@ class _DetalhesReservaPageState extends State<DetalhesReservaPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           _buildInfoRow(Icons.people_alt_rounded, "${reserva.numHospedes} Hóspedes"),
-                          _buildInfoRow(Icons.confirmation_number_rounded, "ID: ...${reserva.id.substring(reserva.id.length - 4)}"),
+                          _buildInfoRow(Icons.confirmation_number_rounded, "ID: #${reserva.id}"),
                         ],
                       )
                     ],

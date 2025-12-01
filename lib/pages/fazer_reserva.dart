@@ -1,5 +1,9 @@
+// lib/pages/fazer_reserva.dart
+
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // 1. Import do Firebase
 import 'package:hotel_app/data/reserva_service.dart';
+import 'package:hotel_app/models/hospede.dart'; // 2. Import do Modelo Hospede
 import 'package:hotel_app/models/quarto.dart';
 import 'package:hotel_app/models/reserva.dart';
 import 'confirmation_reserva.dart';
@@ -26,7 +30,13 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
   DateTime _dataEntrada = DateTime.now();
   DateTime _dataSaida = DateTime.now().add(const Duration(days: 1));
   int _quantidadeHospedes = 1;
+  
+  // 3. Controladores para os novos campos
+  final TextEditingController _cpfController = TextEditingController();
+  final TextEditingController _telefoneController = TextEditingController();
+  
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _isLoading = false; // Para travar o botão durante o envio
 
   double get _precoDiaria => widget.quarto.preco;
 
@@ -46,20 +56,25 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
     _quantidadeHospedes = 1;
   }
 
-  // Função auxiliar para formatação manual de data
+  @override
+  void dispose() {
+    // Limpeza de memória
+    _cpfController.dispose();
+    _telefoneController.dispose();
+    super.dispose();
+  }
+
   String _formatarData(DateTime data) {
     return '${data.day.toString().padLeft(2, '0')}/'
         '${data.month.toString().padLeft(2, '0')}/'
         '${data.year}';
   }
 
-  // Função auxiliar para formatação manual de moeda
   String _formatarMoeda(double valor) {
     String valorString = valor.toStringAsFixed(2).replaceAll('.', ',');
     return 'R\$ $valorString';
   }
 
-  // 1. Lógica para buscar disponibilidade
   Future<void> _buscarDisponibilidade() async {
     try {
       await widget.reservaService.buscarQuartosDisponiveis(
@@ -67,18 +82,16 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
         _dataSaida,
       );
     } catch (e) {
-      // Mostrar mensagem de erro para o usuário
+      // Silencioso
     }
   }
 
-  // Função para abrir o seletor de datas e atualizar o estado
   Future<void> _selecionarData(BuildContext context, bool isEntrada) async {
     final DateTime? dataSelecionada = await showDatePicker(
       context: context,
       initialDate: isEntrada ? _dataEntrada : _dataSaida,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
-      // Aplica o tema do app ao calendário
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -106,55 +119,67 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
             _dataSaida = dataSelecionada;
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('A data de saída deve ser depois da data de entrada.'),
-              ),
+              const SnackBar(content: Text('A data de saída deve ser depois da data de entrada.')),
             );
           }
         }
-        _buscarDisponibilidade();
       });
     }
   }
 
-  // 2. Lógica para criar a reserva
+  // ===========================================================================
+  // 4. LÓGICA DE RESERVA ATUALIZADA
+  // ===========================================================================
   Future<void> _fazerReserva(BuildContext context) async {
+    // Valida se CPF e Telefone foram preenchidos
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    if (_quantidadeHospedes > widget.quarto.capacidade) {
+    // Pega o usuário logado
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Número de hóspedes excede a capacidade do quarto (${widget.quarto.capacidade}).',
-          ),
-        ),
+        const SnackBar(content: Text('Erro: Usuário não autenticado. Faça login novamente.')),
       );
       return;
     }
 
+    setState(() => _isLoading = true);
+
     try {
+      // A. Montar objeto Hospede com dados do Firebase + Formulário
+      final hospede = Hospede(
+        uidFirebase: user.uid,
+        nome: user.displayName ?? 'Hóspede App',
+        email: user.email ?? '',
+        cpf: _cpfController.text,       // Campo digitado
+        telefone: _telefoneController.text, // Campo digitado
+      );
+
+      // B. Montar objeto Reserva (IDs vazios pois o backend gera)
       final novaReserva = Reserva(
-        id: 'temp_id_local',
+        id: '', 
         quartoId: widget.quarto.id,
-        clienteId: 'CLIENTE_LOGADO_ID',
+        clienteId: '', // O Service vai preencher isso após salvar o hóspede
         dataEntrada: _dataEntrada,
         dataSaida: _dataSaida,
         valorTotal: _valorTotal,
-        status: 'PENDING',
+        status: 'Pendente',
         numHospedes: _quantidadeHospedes,
       );
 
+      // C. Enviar para o Service (que salva hóspede -> salva reserva)
       final reservaId = await widget.reservaService.criarNovaReserva(
-        novaReserva,
+        novaReserva, 
+        hospede
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Reserva criada com sucesso! ID: $reservaId')),
+        SnackBar(content: Text('Reserva criada! ID: $reservaId')),
       );
       
-      // Navega para a tela de confirmação
+      // Navega para confirmação
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -167,10 +192,10 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Falha ao criar reserva. Tente novamente.'),
-        ),
+         SnackBar(content: Text('Falha ao criar reserva: $e')),
       );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -183,12 +208,8 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        title: const Text(
-          'Confirmar Reserva',
-          style: TextStyle(color: Color(0xFF333333), fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Confirmar Reserva', style: TextStyle(color: Color(0xFF333333), fontWeight: FontWeight.bold)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF333333)),
           onPressed: () => Navigator.pop(context),
@@ -203,56 +224,39 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 
-                // HEADER INFO
-                Text(
-                  'Quarto: ${widget.quarto.tipo}',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: _primaryColor,
-                  ),
-                ),
-                Text(
-                  'Preço Diária: ${_formatarMoeda(_precoDiaria)}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
-                ),
+                Text('Quarto: ${widget.quarto.tipo}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: _primaryColor)),
+                Text('Preço Diária: ${_formatarMoeda(_precoDiaria)}', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
                 const SizedBox(height: 30),
 
-                // Seletor de Data de Entrada
-                _buildDataSelector(
-                  context,
-                  label: 'Check-in (Entrada)',
-                  data: _dataEntrada,
-                  isEntrada: true,
-                  icon: Icons.login_rounded,
+                // === 5. NOVOS CAMPOS DE DADOS PESSOAIS ===
+                const Text("Dados do Hóspede", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 15),
+                _buildTextField(
+                  label: "CPF (apenas números)",
+                  controller: _cpfController,
+                  icon: Icons.badge_outlined,
+                  keyboardType: TextInputType.number,
                 ),
+                const SizedBox(height: 15),
+                _buildTextField(
+                  label: "Telefone",
+                  controller: _telefoneController,
+                  icon: Icons.phone_outlined,
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 30),
+                // ========================================
+
+                _buildDataSelector(context, label: 'Check-in (Entrada)', data: _dataEntrada, isEntrada: true, icon: Icons.login_rounded),
                 const SizedBox(height: 16),
-
-                // Seletor de Data de Saída
-                _buildDataSelector(
-                  context,
-                  label: 'Check-out (Saída)',
-                  data: _dataSaida,
-                  isEntrada: false,
-                  icon: Icons.logout_rounded,
-                ),
+                _buildDataSelector(context, label: 'Check-out (Saída)', data: _dataSaida, isEntrada: false, icon: Icons.logout_rounded),
                 const SizedBox(height: 25),
-
-                // Seletor de Quantidade de Hóspedes
                 _buildHospedesSelector(),
                 const SizedBox(height: 40),
 
-                // Resumo da Reserva
-                const Text(
-                  'Resumo da Estadia',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
-                ),
+                const Text('Resumo da Estadia', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF333333))),
                 const Divider(height: 20, thickness: 1),
                 
-                // Linha Diárias
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -262,58 +266,37 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
                 ),
                 const SizedBox(height: 10),
                 
-                // Linha Hóspedes
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Hóspedes:', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
-                    Text(
-                      '$_quantidadeHospedes Pessoas',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
+                    Text('$_quantidadeHospedes Pessoas', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                   ],
                 ),
                 const SizedBox(height: 10),
 
-                // Linha Total
                 const Divider(height: 20, thickness: 1.5),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'VALOR TOTAL:',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      '${_formatarMoeda(_valorTotal)}',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: _primaryColor, // Cor Primária
-                      ),
-                    ),
+                    const Text('VALOR TOTAL:', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                    Text('${_formatarMoeda(_valorTotal)}', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: _primaryColor)),
                   ],
                 ),
                 const SizedBox(height: 40),
 
-                // Botão de Reserva
                 SizedBox(
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: () => _fazerReserva(context),
+                    onPressed: _isLoading ? null : () => _fazerReserva(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _primaryColor,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 5,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text(
-                      'Confirmar Reserva',
-                      style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
+                    child: _isLoading 
+                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Text('Confirmar Reserva', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],
@@ -326,79 +309,66 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
 
   // === WIDGETS AUXILIARES ===
 
+  // Novo Widget para Input de Texto
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      validator: (value) {
+        if (value == null || value.isEmpty) return 'Campo obrigatório';
+        if (label.contains("CPF") && value.length < 11) return 'CPF inválido';
+        return null;
+      },
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: _primaryColor),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      ),
+    );
+  }
+
   Widget _buildHospedesSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Quantidade de Hóspedes',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
+        const Text('Quantidade de Hóspedes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
         const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))]),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '$_quantidadeHospedes Pessoas',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
+              Text('$_quantidadeHospedes Pessoas', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               Row(
                 children: [
-                  _RoundIconButton(
-                    icon: Icons.remove,
-                    color: Colors.grey[700]!,
-                    onTap: () {
-                      if (_quantidadeHospedes > 1) setState(() => _quantidadeHospedes--);
-                    },
-                  ),
+                  _RoundIconButton(icon: Icons.remove, color: Colors.grey[700]!, onTap: () { if (_quantidadeHospedes > 1) setState(() => _quantidadeHospedes--); }),
                   const SizedBox(width: 15),
-                  _RoundIconButton(
-                    icon: Icons.add,
-                    color: _primaryColor,
-                    onTap: () {
-                      if (_quantidadeHospedes < widget.quarto.capacidade) {
-                        setState(() => _quantidadeHospedes++);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Limite máximo de hóspedes (${widget.quarto.capacidade}) atingido.')),
-                        );
-                      }
-                    },
-                  ),
+                  _RoundIconButton(icon: Icons.add, color: _primaryColor, onTap: () {
+                    if (_quantidadeHospedes < widget.quarto.capacidade) {
+                      setState(() => _quantidadeHospedes++);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Limite máximo de hóspedes atingido.')));
+                    }
+                  }),
                 ],
               ),
             ],
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          'Capacidade máxima do quarto: ${widget.quarto.capacidade} Pessoas.',
-          style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-        ),
       ],
     );
   }
 
-  Widget _buildDataSelector(
-    BuildContext context, {
-    required String label,
-    required DateTime data,
-    required bool isEntrada,
-    required IconData icon,
-  }) {
+  Widget _buildDataSelector(BuildContext context, {required String label, required DateTime data, required bool isEntrada, required IconData icon}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -408,26 +378,12 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
           onTap: () => _selecionarData(context, isEntrada),
           child: Container(
             padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))]),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
-                  children: [
-                    Icon(icon, size: 20, color: _primaryColor),
-                    const SizedBox(width: 10),
-                    Text(_formatarData(data), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                  ],
+                  children: [Icon(icon, size: 20, color: _primaryColor), const SizedBox(width: 10), Text(_formatarData(data), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500))],
                 ),
                 const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
               ],
@@ -439,14 +395,11 @@ class _FazerReservaPageState extends State<FazerReservaPage> {
   }
 }
 
-// Widget auxiliar para os botões de + e -
 class _RoundIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final Color color;
-
   const _RoundIconButton({required this.icon, required this.onTap, required this.color});
-
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -454,10 +407,7 @@ class _RoundIconButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(25),
       child: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          shape: BoxShape.circle,
-        ),
+        decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
         child: Icon(icon, size: 20, color: color),
       ),
     );

@@ -1,7 +1,9 @@
+// lib/models/reserva.dart
+
 class Reserva {
   final String id;
   final String quartoId;
-  final String clienteId;
+  final String clienteId; // Isso armazena o CPF do hóspede
   final DateTime dataEntrada;
   final DateTime dataSaida;
   final double valorTotal;
@@ -20,58 +22,62 @@ class Reserva {
   });
 
   // ==========================================================
-  // 1. ADICIONADO: Converte JSON do Django para Objeto Reserva
+  // 1. LER DO DJANGO (GET)
   // ==========================================================
   factory Reserva.fromJson(Map<String, dynamic> json) {
     return Reserva(
-      // Converte para String, pois o Django pode enviar int
       id: json['id'].toString(),
       
-      // Django envia 'quarto' (ID), mapeamos para quartoId
-      quartoId: (json['quarto'] ?? json['quartoId']).toString(),
+      // Tenta ler 'quarto' (objeto ou id)
+      quartoId: json['quarto'].toString(),
       
-      // Django envia 'cliente' (ID), mapeamos para clienteId
-      clienteId: (json['cliente'] ?? json['clienteId']).toString(),
+      // O Django pode mandar 'hospede' ou 'cliente' dependendo do serializer
+      clienteId: (json['hospede'] ?? json['cliente'] ?? '').toString(),
       
-      // Tenta ler 'checkin' ou 'data_entrada'
-      dataEntrada: DateTime.parse(json['checkin'] ?? json['data_entrada']),
+      // Mapeia os campos de data que vêm do Django
+      dataEntrada: DateTime.parse(json['dtEntrada'] ?? json['checkin'] ?? DateTime.now().toString()),
+      dataSaida: DateTime.parse(json['dtSaida'] ?? json['checkout'] ?? DateTime.now().toString()),
       
-      // Tenta ler 'checkout' ou 'data_saida'
-      dataSaida: DateTime.parse(json['checkout'] ?? json['data_saida']),
-      
-      valorTotal: double.tryParse(json['valor_total'].toString()) ?? 0.0,
+      valorTotal: double.tryParse(json['valor_total']?.toString() ?? '0') ?? 0.0,
       
       status: json['status'] ?? 'Pendente',
       
-      // Se não vier do banco, assume 1
-      numHospedes: int.tryParse(json['numero_hospedes'].toString()) ?? 1,
+      // Mapeia quantidade de pessoas
+      numHospedes: int.tryParse((json['quantPessoas'] ?? json['numero_hospedes']).toString()) ?? 1,
     );
   }
 
   // ==========================================================
-  // 2. ADICIONADO: Converte Objeto Reserva para JSON (Enviar p/ API)
+  // 2. ENVIAR PARA O DJANGO (POST) 
   // ==========================================================
   Map<String, dynamic> toJson() {
     return {
-      // Nota: Geralmente não enviamos ID na criação, mas se for edição, enviamos.
+      // Se tiver ID, envia (edição), senão ignora
       if (id.isNotEmpty) 'id': id,
       
-      // Django espera chaves que batam com o serializer dele
+      // CORREÇÃO 1: Campo 'quarto' deve ser Inteiro
       'quarto': int.tryParse(quartoId), 
-      'cliente': int.tryParse(clienteId),
       
-      // Formata data para YYYY-MM-DD
-      'checkin': dataEntrada.toIso8601String().split('T')[0],
-      'checkout': dataSaida.toIso8601String().split('T')[0],
+      // CORREÇÃO 2: A chave deve ser 'hospede' (é o CPF/String)
+      'hospede': clienteId, 
       
+      // CORREÇÃO 3: A chave deve ser 'dtEntrada' (YYYY-MM-DD)
+      'dtEntrada': dataEntrada.toIso8601String().split('T')[0],
+      
+      // CORREÇÃO 4: A chave deve ser 'dtSaida' (YYYY-MM-DD)
+      'dtSaida': dataSaida.toIso8601String().split('T')[0],
+      
+      // CORREÇÃO 5: A chave deve ser 'quantPessoas'
+      'quantPessoas': numHospedes,
+
+      // Campos opcionais que talvez seu model use internamente ou ignore
       'valor_total': valorTotal,
       'status': status,
-      'numero_hospedes': numHospedes,
     };
   }
 
   // ==========================================================
-  // 3. MANTIDO: Seu método copyWith Original
+  // 3. COPY WITH
   // ==========================================================
   Reserva copyWith({
     String? id,
@@ -81,7 +87,7 @@ class Reserva {
     DateTime? dataSaida,
     double? valorTotal,
     String? status,
-    int? numHospedes, // Adicionei aqui nos argumentos para funcionar
+    int? numHospedes,
   }) {
     return Reserva(
       id: id ?? this.id,
