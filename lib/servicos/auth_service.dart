@@ -5,7 +5,9 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Cadastrar usuário
+  // ===========================================================================
+  // CADASTRAR USUÁRIO
+  // ===========================================================================
   Future<String?> registerUser({
     required String nome,
     required String sobrenome,
@@ -57,12 +59,16 @@ class AuthService {
     }
   }
 
-  // Logout usuário
+    // ===========================================================================
+  // LOGOUT
+  // ===========================================================================
   Future<void> signOut() async {
     await _auth.signOut();
   }
 
-  // Login usuário
+  // ===========================================================================
+  // LOGIN
+  // ===========================================================================
   Future<String?> signInUser({
     required String email,
     required String senha,
@@ -91,7 +97,9 @@ class AuthService {
     }
   }
 
-  // === ATUALIZAR DADOS DO USUÁRIO
+  // ===========================================================================
+  // ATUALIZAR DADOS USUÁRIO
+  // ===========================================================================
   Future<String?> atualizarDadosUsuario({
     required String uid,
     required Map<String, dynamic> dados,
@@ -106,7 +114,9 @@ class AuthService {
     }
   }
 
+  // ===========================================================================
   // EXCLUIR CONTA
+  // ===========================================================================
   Future<String?> deleteUser() async {
     User? user = _auth.currentUser;
     if (user == null) return "Nenhum usuário logado.";
@@ -129,7 +139,9 @@ class AuthService {
     }
   }
 
-  // === REDEFINIR SENHA EMAIL ===
+    // ===========================================================================
+  // REDEFINIR SENHA POR EMAIL
+  // ===========================================================================
   Future<String?> redefinirSenha({required String email}) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
@@ -148,7 +160,9 @@ class AuthService {
     }
   }
 
-  // === CONFIRMAR REDEFINIÇÃO DE SENHA (Deep Link) ===
+   // ===========================================================================
+  // CONFIRMAR REDEFINIÇÃO DE SENHA
+  // ===========================================================================
   Future<String?> confirmarRedefinicaoSenha({required String code, required String newPassword}) async {
     try {
       await _auth.confirmPasswordReset(code: code, newPassword: newPassword);
@@ -160,7 +174,9 @@ class AuthService {
     }
   }
 
-  // === ALTERAR SENHA (LOGADO) ===
+  // ===========================================================================
+  // ALTERAR SENHA - USUARIO LOGADO
+  // ===========================================================================
   Future<String?> alterarSenha({required String senhaAtual, required String novaSenha}) async {
     User? user = _auth.currentUser;
     if (user == null || user.email == null) return "Usuário não identificado.";
@@ -188,6 +204,24 @@ class AuthService {
     } catch (e) {
       return e.toString();
     }
+  }
+
+  // ===========================================================================
+  // BUSCAR DADOS DO USUÁRIO LOGADO
+  // ===========================================================================
+  Future<Map<String, dynamic>?> getUserData() async {
+    User? user = _auth.currentUser;
+    if (user == null) return null;
+
+    try {
+      DocumentSnapshot doc = await _firestore.collection('usuario').doc(user.uid).get();
+      if (doc.exists) {
+        return doc.data() as Map<String, dynamic>;
+      }
+    } catch (e) {
+      print("Erro ao buscar dados do usuário: $e");
+    }
+    return null;
   }
 
   User? get currentUser => _auth.currentUser;

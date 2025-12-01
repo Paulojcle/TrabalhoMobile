@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart'; // Para kIsWeb
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:firebase_auth/firebase_auth.dart'; // Importante para o Token
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/quarto.dart';
 import '../models/reserva.dart';
 import '../models/hospede.dart';
@@ -38,20 +38,23 @@ class ReservaService {
   }
 
   // ===========================================================================
-  // 3. BUSCAR TODOS OS QUARTOS (Público ou Protegido)
+  // 3. BUSCAR TODOS OS QUARTOS (Somente Disponíveis)
   // ===========================================================================
   Future<List<Quarto>> buscarTodosQuartos() async {
     try {
-      // Se quiser proteger essa rota também, use _getHeaders(). 
-      // Por enquanto, vou deixar público (headers vazio ou só json).
       final response = await http.get(Uri.parse('$baseUrl/api/quartos/'));
 
       if (response.statusCode == 200) {
         List<dynamic> body = json.decode(response.body);
+        
         return body.map((item) {
           _corrigirUrlImagem(item);
           return Quarto.fromJson(item);
-        }).toList();
+        })
+        // ⚠️ FILTRO APLICADO AQUI: Remove quartos indisponíveis da lista
+        .where((quarto) => quarto.disponivel == true)
+        .toList();
+
       } else {
         throw Exception('Erro ao carregar quartos: ${response.statusCode}');
       }
@@ -217,6 +220,33 @@ class ReservaService {
       }
     } catch (e) {
       throw Exception('Erro ao cancelar reserva: $e');
+    }
+  }
+
+  // ===========================================================================
+  // 10. BUSCAR QUARTO ÚNICO (Protegido com Token)
+  // ===========================================================================
+  Future<Quarto> buscarQuartoPorId(String id) async {
+    try {
+      // 1. Pega o Token de segurança
+      final headers = await _getHeaders(); 
+
+      // 2. Envia a requisição COM o token no cabeçalho
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/quartos/$id/'),
+        headers: headers, // <--- O SEGREDO ESTÁ AQUI
+      );
+
+      if (response.statusCode == 200) {
+        final dynamic body = json.decode(response.body);
+        _corrigirUrlImagem(body);
+        return Quarto.fromJson(body);
+      } else {
+        // Se der 403, vai cair aqui
+        throw Exception('Acesso negado ou quarto não encontrado (Erro ${response.statusCode})');
+      }
+    } catch (e) {
+      throw Exception('Erro ao buscar quarto: $e');
     }
   }
 
