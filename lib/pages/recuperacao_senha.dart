@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../servicos/auth_service.dart';
-import 'check_email.dart'; 
+import 'check_email.dart';
 
 class RecuperacaoSenha extends StatefulWidget {
   const RecuperacaoSenha({super.key});
@@ -23,9 +23,9 @@ class _RecuperacaoSenhaState extends State<RecuperacaoSenha> {
     String email = _emailController.text.trim();
 
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Digite seu email.")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Digite seu email.")));
       return;
     }
 
@@ -41,21 +41,15 @@ class _RecuperacaoSenhaState extends State<RecuperacaoSenha> {
     });
 
     if (erro == null) {
-      // === NAVEGAÇÃO PARA CHECAR EMAIL ===
       if (!mounted) return;
-      
+
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const ChecarEmail()),
       );
-      // ===============================================
-      
     } else {
-      // ERRO
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(erro)),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(erro)));
     }
   }
 
@@ -96,25 +90,33 @@ class _RecuperacaoSenhaState extends State<RecuperacaoSenha> {
                     style: TextStyle(fontSize: 15, color: Color(0xFF7F7F7F)),
                   ),
                   const SizedBox(height: 50),
-                  
-                  // CAMPO DE TEXTO
+
                   TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       hintText: 'email@email.com',
-                      hintStyle: const TextStyle(color: Color(0xFF7F7F7F), fontSize: 14),
+                      hintStyle: const TextStyle(
+                        color: Color(0xFF7F7F7F),
+                        fontSize: 14,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
-                        borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),
+                        borderSide: const BorderSide(
+                          color: Color.fromARGB(255, 221, 221, 221),
+                        ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
-                        borderSide: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),
+                        borderSide: const BorderSide(
+                          color: Color.fromARGB(255, 221, 221, 221),
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
-                        borderSide: const BorderSide(color: Color.fromARGB(255, 0, 30, 54)),
+                        borderSide: const BorderSide(
+                          color: Color.fromARGB(255, 0, 30, 54),
+                        ),
                       ),
                       suffixIcon: const Padding(
                         padding: EdgeInsets.only(right: 20),
@@ -142,7 +144,9 @@ class _RecuperacaoSenhaState extends State<RecuperacaoSenha> {
                           ? const SizedBox(
                               height: 25,
                               width: 25,
-                              child: CircularProgressIndicator(color: Colors.white),
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
                             )
                           : const Text(
                               'Recuperar senha',
@@ -154,7 +158,7 @@ class _RecuperacaoSenhaState extends State<RecuperacaoSenha> {
                     ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),

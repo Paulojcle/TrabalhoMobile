@@ -11,12 +11,11 @@ class AlterarSenhaPage extends StatefulWidget {
 class _AlterarSenhaPageState extends State<AlterarSenhaPage> {
   final TextEditingController _senhaAtualController = TextEditingController();
   final TextEditingController _novaSenhaController = TextEditingController();
-  
+
   bool _obscureSenhaAtual = true;
   bool _obscureNovaSenha = true;
   bool _isLoading = false;
 
-  // Validações
   bool _hasMinLength = false;
   bool _hasLetters = false;
   bool _hasDigits = false;
@@ -41,12 +40,14 @@ class _AlterarSenhaPageState extends State<AlterarSenhaPage> {
     String novaSenha = _novaSenhaController.text.trim();
 
     if (senhaAtual.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Digite sua senha atual.")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Digite sua senha atual.")));
       return;
     }
 
     if (!(_hasMinLength && _hasLetters && _hasDigits)) {
-      return; // Botão já deve estar desabilitado, mas por segurança
+      return;
     }
 
     setState(() => _isLoading = true);
@@ -60,17 +61,25 @@ class _AlterarSenhaPageState extends State<AlterarSenhaPage> {
 
     if (erro == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Senha alterada com sucesso!")));
-      Navigator.pop(context); // Volta para o perfil
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Senha alterada com sucesso!")),
+      );
+      Navigator.pop(context);
     } else {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erro: $erro")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Erro: $erro")));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    bool isFormValid = _hasMinLength && _hasLetters && _hasDigits && _senhaAtualController.text.isNotEmpty;
+    bool isFormValid =
+        _hasMinLength &&
+        _hasLetters &&
+        _hasDigits &&
+        _senhaAtualController.text.isNotEmpty;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -78,7 +87,10 @@ class _AlterarSenhaPageState extends State<AlterarSenhaPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        title: const Text("Alterar Senha", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Alterar Senha",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF333333)),
           onPressed: () => Navigator.pop(context),
@@ -90,25 +102,42 @@ class _AlterarSenhaPageState extends State<AlterarSenhaPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // CAMPO SENHA ATUAL
-              const Text("Senha Atual", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF333333))),
+              const Text(
+                "Senha Atual",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF333333),
+                ),
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: _senhaAtualController,
                 obscureText: _obscureSenhaAtual,
                 decoration: _inputDecoration().copyWith(
                   suffixIcon: IconButton(
-                    icon: Icon(_obscureSenhaAtual ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
-                    onPressed: () => setState(() => _obscureSenhaAtual = !_obscureSenhaAtual),
+                    icon: Icon(
+                      _obscureSenhaAtual
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () => setState(
+                      () => _obscureSenhaAtual = !_obscureSenhaAtual,
+                    ),
                   ),
                 ),
-                onChanged: (val) => setState(() {}), // Apenas para atualizar estado do botão
+                onChanged: (val) => setState(() {}),
               ),
 
               const SizedBox(height: 25),
 
-              // CAMPO NOVA SENHA
-              const Text("Nova Senha", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF333333))),
+              const Text(
+                "Nova Senha",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF333333),
+                ),
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: _novaSenhaController,
@@ -116,40 +145,70 @@ class _AlterarSenhaPageState extends State<AlterarSenhaPage> {
                 onChanged: _validarNovaSenha,
                 decoration: _inputDecoration().copyWith(
                   suffixIcon: IconButton(
-                    icon: Icon(_obscureNovaSenha ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
-                    onPressed: () => setState(() => _obscureNovaSenha = !_obscureNovaSenha),
+                    icon: Icon(
+                      _obscureNovaSenha
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () =>
+                        setState(() => _obscureNovaSenha = !_obscureNovaSenha),
                   ),
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              // REQUISITOS
-              const Text("A nova senha deve conter:", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 13)),
+              // Requsitos da senha
+              const Text(
+                "A nova senha deve conter:",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                  fontSize: 13,
+                ),
+              ),
               const SizedBox(height: 10),
-              _RequisitoItem(atendido: _hasMinLength, texto: "Pelo menos 8 caracteres"),
-              _RequisitoItem(atendido: _hasLetters, texto: "Pelo menos uma letra"),
-              _RequisitoItem(atendido: _hasDigits, texto: "Pelo menos um número"),
+              _RequisitoItem(
+                atendido: _hasMinLength,
+                texto: "Pelo menos 8 caracteres",
+              ),
+              _RequisitoItem(
+                atendido: _hasLetters,
+                texto: "Pelo menos uma letra",
+              ),
+              _RequisitoItem(
+                atendido: _hasDigits,
+                texto: "Pelo menos um número",
+              ),
 
               const SizedBox(height: 40),
 
-              // BOTÃO SALVAR
+              // botão salvar
               SizedBox(
                 width: double.infinity,
                 height: 60,
                 child: ElevatedButton(
-                  onPressed: (isFormValid && !_isLoading) ? _salvarNovaSenha : null,
+                  onPressed: (isFormValid && !_isLoading)
+                      ? _salvarNovaSenha
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0B2A4A),
                     disabledBackgroundColor: Colors.grey[300],
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    ),
                   ),
-                  child: _isLoading 
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'Salvar Alterações',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'Salvar Alterações',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                 ),
               ),
             ],
@@ -164,9 +223,18 @@ class _AlterarSenhaPageState extends State<AlterarSenhaPage> {
       hintText: '********',
       hintStyle: const TextStyle(color: Color(0xFF7F7F7F)),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Color(0xFFDDDDDD))),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Color(0xFFDDDDDD))),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Color(0xFF0B2A4A))),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: const BorderSide(color: Color(0xFFDDDDDD)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: const BorderSide(color: Color(0xFFDDDDDD)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: const BorderSide(color: Color(0xFF0B2A4A)),
+      ),
     );
   }
 }
@@ -181,9 +249,20 @@ class _RequisitoItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
-          Icon(atendido ? Icons.check_circle : Icons.circle_outlined, color: atendido ? Colors.green : Colors.grey, size: 18),
+          Icon(
+            atendido ? Icons.check_circle : Icons.circle_outlined,
+            color: atendido ? Colors.green : Colors.grey,
+            size: 18,
+          ),
           const SizedBox(width: 10),
-          Text(texto, style: TextStyle(color: atendido ? Colors.green[700] : Colors.grey, fontSize: 13, fontWeight: atendido ? FontWeight.bold : FontWeight.normal)),
+          Text(
+            texto,
+            style: TextStyle(
+              color: atendido ? Colors.green[700] : Colors.grey,
+              fontSize: 13,
+              fontWeight: atendido ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
         ],
       ),
     );

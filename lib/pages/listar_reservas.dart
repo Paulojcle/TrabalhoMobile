@@ -18,7 +18,6 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
   Future<List<Reserva>>? _futureReservas;
   User? _currentUser;
 
-  // Paleta de Cores (Consistente com o App)
   final Color _primaryColor = const Color(0xFF0B2A4A);
   final Color _backgroundColor = const Color(0xFFF8F9FA);
   final Color _cardColor = Colors.white;
@@ -45,7 +44,6 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
     _verificarUsuario();
   }
 
-  // Formatadores
   String _formatarData(DateTime data) =>
       '${data.day.toString().padLeft(2, '0')}/${data.month.toString().padLeft(2, '0')}/${data.year}';
 
@@ -59,7 +57,6 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // === CABEÇALHO PERSONALIZADO ===
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
               child: Row(
@@ -78,10 +75,7 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
                       ),
                       Text(
                         'Histórico e agendamentos',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                     ],
                   ),
@@ -106,7 +100,6 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
               ),
             ),
 
-            // === CONTEÚDO PRINCIPAL ===
             Expanded(
               child: _currentUser == null
                   ? _buildLoginRequiredState()
@@ -118,7 +111,6 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
     );
   }
 
-  // 1. Estado: Login Necessário
   Widget _buildLoginRequiredState() {
     return Center(
       child: Padding(
@@ -132,7 +124,11 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
                 color: _primaryColor.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.lock_person_rounded, size: 60, color: _primaryColor),
+              child: Icon(
+                Icons.lock_person_rounded,
+                size: 60,
+                color: _primaryColor,
+              ),
             ),
             const SizedBox(height: 25),
             const Text(
@@ -163,27 +159,28 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
                 ),
                 child: const Text(
                   "Fazer Login / Criar Conta",
-                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
-  // 2. Estado: Lista de Reservas (Com FutureBuilder)
   Widget _buildReservasList() {
     return FutureBuilder<List<Reserva>>(
       future: _futureReservas,
       builder: (context, snapshot) {
-        // Carregando
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator(color: _primaryColor));
         }
 
-        // Erro
         if (snapshot.hasError) {
           return Center(
             child: Padding(
@@ -191,11 +188,19 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.wifi_off_rounded, size: 60, color: Colors.red[300]),
+                  Icon(
+                    Icons.wifi_off_rounded,
+                    size: 60,
+                    color: Colors.red[300],
+                  ),
                   const SizedBox(height: 20),
                   Text(
                     "Não foi possível carregar",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -208,7 +213,7 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
                     onPressed: _recarregarLista,
                     icon: const Icon(Icons.refresh),
                     label: const Text("Tentar Novamente"),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -217,17 +222,24 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
 
         final reservas = snapshot.data ?? [];
 
-        // Lista Vazia
         if (reservas.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.calendar_month_outlined, size: 80, color: Colors.grey[300]),
+                Icon(
+                  Icons.calendar_month_outlined,
+                  size: 80,
+                  color: Colors.grey[300],
+                ),
                 const SizedBox(height: 20),
                 Text(
                   "Nenhuma reserva encontrada",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[600],
+                  ),
                 ),
                 const SizedBox(height: 5),
                 Text(
@@ -239,7 +251,6 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
           );
         }
 
-        // Lista Sucesso
         return RefreshIndicator(
           onRefresh: () async => _recarregarLista(),
           color: _primaryColor,
@@ -257,9 +268,8 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
     );
   }
 
-  // 3. O Card da Reserva (Bonito)
+  // O Card da Reserva (Bonito)
   Widget _buildReservaCard(Reserva reserva) {
-    // Lógica de cores baseada no status
     Color statusColor;
     Color statusBg;
     String statusText = reserva.status.toUpperCase();
@@ -277,10 +287,10 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
         statusColor = Colors.grey.shade700;
         statusBg = Colors.grey.shade100;
         break;
-      default: // Pendente
+      default:
         statusColor = Colors.orange.shade800;
         statusBg = Colors.orange.shade50;
-        statusText = "PENDENTE"; // Tradução visual se necessário
+        statusText = "PENDENTE";
     }
 
     return GestureDetector(
@@ -313,7 +323,6 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Linha Superior: ID do Quarto e Status
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -325,7 +334,11 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
                           color: _primaryColor.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.bed_rounded, color: _primaryColor, size: 20),
+                        child: Icon(
+                          Icons.bed_rounded,
+                          color: _primaryColor,
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Column(
@@ -347,9 +360,11 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
                       ),
                     ],
                   ),
-                  // Chip de Status
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: statusBg,
                       borderRadius: BorderRadius.circular(20),
@@ -365,7 +380,7 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 15),
               const Divider(height: 1, color: Color(0xFFEEEEEE)),
               const SizedBox(height: 15),
@@ -374,21 +389,32 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildInfoColumn("Check-in", _formatarData(reserva.dataEntrada), CrossAxisAlignment.start),
+                  _buildInfoColumn(
+                    "Check-in",
+                    _formatarData(reserva.dataEntrada),
+                    CrossAxisAlignment.start,
+                  ),
                   Icon(Icons.arrow_right_alt_rounded, color: Colors.grey[300]),
-                  _buildInfoColumn("Check-out", _formatarData(reserva.dataSaida), CrossAxisAlignment.end),
+                  _buildInfoColumn(
+                    "Check-out",
+                    _formatarData(reserva.dataSaida),
+                    CrossAxisAlignment.end,
+                  ),
                 ],
               ),
 
               const SizedBox(height: 15),
-              
-              // Linha Inferior: Valor e Hóspedes
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.people_outline, size: 16, color: Colors.grey[500]),
+                      Icon(
+                        Icons.people_outline,
+                        size: 16,
+                        color: Colors.grey[500],
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         "${reserva.numHospedes} Hóspedes",
@@ -413,7 +439,11 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
     );
   }
 
-  Widget _buildInfoColumn(String label, String value, CrossAxisAlignment align) {
+  Widget _buildInfoColumn(
+    String label,
+    String value,
+    CrossAxisAlignment align,
+  ) {
     return Column(
       crossAxisAlignment: align,
       children: [
@@ -421,7 +451,11 @@ class _ListarReservasPageState extends State<ListarReservasPage> {
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF333333)),
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF333333),
+          ),
         ),
       ],
     );

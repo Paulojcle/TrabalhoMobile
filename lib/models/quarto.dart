@@ -7,7 +7,7 @@ class Quarto {
   final int camas;
   final int banheiros;
   final bool disponivel;
-  final String? imageUrl; // ⚠️ Mudança importante: Pode vir nulo do Django
+  final String? imageUrl;
   final double avaliacao;
 
   const Quarto({
@@ -18,31 +18,29 @@ class Quarto {
     required this.capacidade,
     required this.camas,
     required this.banheiros,
-    this.imageUrl, // Opcional
+    this.imageUrl,
     required this.avaliacao,
     this.disponivel = true,
   });
 
-  // Fábrica para converter o JSON do Django para o Objeto Dart
   factory Quarto.fromJson(Map<String, dynamic> json) {
     return Quarto(
       // Django envia 'numero' (int), Flutter quer String 'id'
       id: json['numero'].toString(),
-      
+
       tipo: json['tipo'] ?? 'Padrão',
-      
+
       // Django envia 'preco_diaria' (string/decimal), Flutter quer double
       preco: double.tryParse(json['preco_diaria'].toString()) ?? 0.0,
-      
-      // Mapeando nomes diferentes
+
       descricao: json['descricao_detalhada'] ?? '',
       capacidade: json['capacidade'] ?? 0,
       camas: json['camas'] ?? 0,
       banheiros: json['banheiros'] ?? 0,
-      
+
       // Se não tiver imagem, enviamos null
-      imageUrl: json['imagens'], 
-      
+      imageUrl: json['imagens'],
+
       avaliacao: double.tryParse(json['avaliacao'].toString()) ?? 0.0,
       disponivel: json['disponibilidade'] ?? true,
     );

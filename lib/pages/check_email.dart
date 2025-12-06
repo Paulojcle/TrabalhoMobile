@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login_page.dart'; 
+import 'login_page.dart';
 
 class ChecarEmail extends StatelessWidget {
   const ChecarEmail({super.key});
@@ -24,7 +24,6 @@ class ChecarEmail extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              // Arte + texto centralizados
               const Column(
                 children: [
                   Icon(
@@ -37,7 +36,7 @@ class ChecarEmail extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 51, 51, 51)
+                      color: Color.fromARGB(255, 51, 51, 51),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -46,24 +45,24 @@ class ChecarEmail extends StatelessWidget {
                     'Por favor, cheque o seu email. Nós iremos enviar um link de redefinição de senha.',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Color.fromARGB(255, 51, 51, 51)
+                      color: Color.fromARGB(255, 51, 51, 51),
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ],
               ),
 
-              // Botão fixo na parte inferior
               SizedBox(
                 width: double.infinity,
                 height: 60,
                 child: ElevatedButton(
                   onPressed: () {
-                    // === LÓGICA DE NAVEGAÇÃO ===
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => const LoginPage()),
-                      (route) => false, // Remove todas as telas anteriores da pilha
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                      (route) => false,
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -77,7 +76,7 @@ class ChecarEmail extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
-                      fontWeight: FontWeight.bold
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),

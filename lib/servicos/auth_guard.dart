@@ -8,10 +8,10 @@ Future<bool> requireLogin(BuildContext context) async {
   if (user == null) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),   /* Aqui deve colocar a página de LOGIN -> LoginPage()*/
+      MaterialPageRoute(builder: (context) => const LoginPage()),
     );
-    return false; // Não está logado
+    return false;
   }
 
-  return true; // Está logado
+  return true; // Se retornar true é pq está logado
 }

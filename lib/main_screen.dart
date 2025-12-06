@@ -19,10 +19,9 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  // 1. Criamos a instância do serviço REAL aqui
+  // Criamos a instância do serviço REAL aqui
   final ReservaService _reservaService = ReservaService();
 
-  // A lista de páginas precisa ser 'late' para acessar a variável _reservaService acima
   late final List<Widget> _pages;
 
   @override
@@ -30,23 +29,21 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _selectedIndex = widget.indexInicial;
 
-    // 2. Inicializamos a lista aqui para injetar o serviço corretamente
     _pages = [
-      HomePage(reservaService: _reservaService), 
-      
+      HomePage(reservaService: _reservaService),
+
       /* MENÚ: MINHAS RESERVAS */
       ListarReservasPage(reservaService: _reservaService),
-      
+
       /* MENÚ: CONFIGURAÇÕES */
       ConfigurationPage(),
-      
+
       /* MENÚ: PERFIL */
       ProfilePage(),
     ];
   }
 
   void _onItemTapped(int index) async {
-    // Bloqueio de segurança para a aba Perfil (index 3)
     if (index == 3) {
       bool permitido = await requireLogin(context);
       if (!permitido) return;
@@ -73,7 +70,10 @@ class _MainScreenState extends State<MainScreen> {
         unselectedItemColor: const Color(0xFFC1C1C1),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
-          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: 'Reservas'), 
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list_alt),
+            label: 'Reservas',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Config.'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
         ],

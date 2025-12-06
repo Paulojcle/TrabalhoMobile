@@ -3,8 +3,8 @@ import '../servicos/auth_service.dart';
 
 class RedefinirSenhaPage extends StatefulWidget {
   // Recebe o código secreto vindo do link do email
-  final String oobCode; 
-  
+  final String oobCode;
+
   const RedefinirSenhaPage({super.key, required this.oobCode});
 
   @override
@@ -14,9 +14,7 @@ class RedefinirSenhaPage extends StatefulWidget {
 class _RedefinirSenhaPageState extends State<RedefinirSenhaPage> {
   final TextEditingController _senhaController = TextEditingController();
   bool _obscureText = true;
-  bool _isLoading = false; // Controle de carregamento
-
-  // Variáveis de validação
+  bool _isLoading = false;
   bool _hasMinLength = false;
   bool _hasLetters = false;
   bool _hasDigits = false;
@@ -37,15 +35,14 @@ class _RedefinirSenhaPageState extends State<RedefinirSenhaPage> {
 
   void _confirmarRedefinicao() async {
     if (_hasMinLength && _hasLetters && _hasDigits) {
-      
       setState(() {
         _isLoading = true;
       });
 
       // Chama o AuthService passando o código recebido e a nova senha
       String? erro = await AuthService().confirmarRedefinicaoSenha(
-        code: widget.oobCode, 
-        newPassword: _senhaController.text
+        code: widget.oobCode,
+        newPassword: _senhaController.text,
       );
 
       setState(() {
@@ -53,19 +50,18 @@ class _RedefinirSenhaPageState extends State<RedefinirSenhaPage> {
       });
 
       if (erro == null) {
-        // Sucesso!
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Senha alterada com sucesso! Faça login.")),
+          const SnackBar(
+            content: Text("Senha alterada com sucesso! Faça login."),
+          ),
         );
-        // Remove tudo e volta para a tela de Login (rota '/') ou onde você definir
         Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
-        // Erro
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erro: $erro")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Erro: $erro")));
       }
     }
   }
@@ -92,7 +88,11 @@ class _RedefinirSenhaPageState extends State<RedefinirSenhaPage> {
             children: [
               const Text(
                 'Criar nova senha',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF0B2A4A)),
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0B2A4A),
+                ),
               ),
               const SizedBox(height: 10),
               const Text(
@@ -108,21 +108,38 @@ class _RedefinirSenhaPageState extends State<RedefinirSenhaPage> {
                 decoration: InputDecoration(
                   labelText: 'Nova Senha',
                   hintText: '********',
-                  prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF0B2A4A)),
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
-                    onPressed: () => setState(() => _obscureText = !_obscureText),
+                  prefixIcon: const Icon(
+                    Icons.lock_outline,
+                    color: Color(0xFF0B2A4A),
                   ),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureText ? Icons.visibility_off : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () =>
+                        setState(() => _obscureText = !_obscureText),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
                 ),
               ),
 
               const SizedBox(height: 25),
 
-              // Requisitos
-              _RequisitoItem(atendido: _hasMinLength, texto: "Pelo menos 8 caracteres"),
-              _RequisitoItem(atendido: _hasLetters, texto: "Pelo menos uma letra"),
-              _RequisitoItem(atendido: _hasDigits, texto: "Pelo menos um número"),
+              _RequisitoItem(
+                atendido: _hasMinLength,
+                texto: "Pelo menos 8 caracteres",
+              ),
+              _RequisitoItem(
+                atendido: _hasLetters,
+                texto: "Pelo menos uma letra",
+              ),
+              _RequisitoItem(
+                atendido: _hasDigits,
+                texto: "Pelo menos um número",
+              ),
 
               const SizedBox(height: 40),
 
@@ -130,21 +147,27 @@ class _RedefinirSenhaPageState extends State<RedefinirSenhaPage> {
                 width: double.infinity,
                 height: 60,
                 child: ElevatedButton(
-                  onPressed: (isFormValid && !_isLoading) ? _confirmarRedefinicao : null,
+                  onPressed: (isFormValid && !_isLoading)
+                      ? _confirmarRedefinicao
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0B2A4A),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    ),
                   ),
-                  child: _isLoading 
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        'Redefinir Senha',
-                        style: TextStyle(
-                          color: isFormValid ? Colors.white : Colors.grey[600],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                          'Redefinir Senha',
+                          style: TextStyle(
+                            color: isFormValid
+                                ? Colors.white
+                                : Colors.grey[600],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
                 ),
               ),
             ],
@@ -165,9 +188,19 @@ class _RequisitoItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
-          Icon(atendido ? Icons.check_circle : Icons.circle_outlined, color: atendido ? Colors.green : Colors.grey, size: 20),
+          Icon(
+            atendido ? Icons.check_circle : Icons.circle_outlined,
+            color: atendido ? Colors.green : Colors.grey,
+            size: 20,
+          ),
           const SizedBox(width: 10),
-          Text(texto, style: TextStyle(color: atendido ? Colors.green[700] : Colors.grey, fontWeight: atendido ? FontWeight.bold : FontWeight.normal)),
+          Text(
+            texto,
+            style: TextStyle(
+              color: atendido ? Colors.green[700] : Colors.grey,
+              fontWeight: atendido ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
         ],
       ),
     );

@@ -15,11 +15,12 @@ class _CadastroPageState extends State<CadastroPage> {
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _sobrenomeController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _confirmarEmailController = TextEditingController();
+  final TextEditingController _confirmarEmailController =
+      TextEditingController();
   final TextEditingController _senhaController = TextEditingController();
-  final TextEditingController _confirmarSenhaController = TextEditingController();
+  final TextEditingController _confirmarSenhaController =
+      TextEditingController();
 
-  // Cor principal do tema
   final Color _primaryColor = const Color(0xFF0B2A4A);
 
   @override
@@ -42,14 +43,12 @@ class _CadastroPageState extends State<CadastroPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        
-        // === CORREÇÃO DO APPBAR ===
-        backgroundColor: Colors.white, // Fundo branco
-        surfaceTintColor: Colors.transparent, // Remove a cor "estranha" do Material 3
-        elevation: 0, // Começa sem sombra
-        scrolledUnderElevation: 4.0, // Adiciona sombra suave ao rolar
-        shadowColor: Colors.black.withOpacity(0.5), // Define a cor da sombra (opcional)
-        // ==========================
+
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 4.0,
+        shadowColor: Colors.black.withOpacity(0.5),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -57,7 +56,6 @@ class _CadastroPageState extends State<CadastroPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Título Grande e Moderno
               Text(
                 'Crie sua conta',
                 style: TextStyle(
@@ -70,17 +68,13 @@ class _CadastroPageState extends State<CadastroPage> {
               const SizedBox(height: 10),
               Text(
                 'Preencha seus dados para começar a explorar.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
               const SizedBox(height: 40),
 
-              // --- SEÇÃO 1: DADOS PESSOAIS ---
               _buildSectionTitle("Dados Pessoais"),
               const SizedBox(height: 20),
-              
+
               _buildTextField(
                 label: "Nome",
                 controller: _nomeController,
@@ -95,7 +89,6 @@ class _CadastroPageState extends State<CadastroPage> {
 
               const SizedBox(height: 30),
 
-              // --- SEÇÃO 2: CONTATO ---
               _buildSectionTitle("Contato"),
               const SizedBox(height: 20),
 
@@ -115,7 +108,6 @@ class _CadastroPageState extends State<CadastroPage> {
 
               const SizedBox(height: 30),
 
-              // --- SEÇÃO 3: SEGURANÇA ---
               _buildSectionTitle("Segurança"),
               const SizedBox(height: 20),
 
@@ -123,15 +115,19 @@ class _CadastroPageState extends State<CadastroPage> {
               TextField(
                 obscureText: _obscureSenha,
                 controller: _senhaController,
-                decoration: _inputDecoration("Senha", Icons.lock_outline).copyWith(
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureSenha ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.grey,
+                decoration: _inputDecoration("Senha", Icons.lock_outline)
+                    .copyWith(
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureSenha
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () =>
+                            setState(() => _obscureSenha = !_obscureSenha),
+                      ),
                     ),
-                    onPressed: () => setState(() => _obscureSenha = !_obscureSenha),
-                  ),
-                ),
               ),
               const SizedBox(height: 20),
 
@@ -139,20 +135,29 @@ class _CadastroPageState extends State<CadastroPage> {
               TextField(
                 obscureText: _obscureConfirmarSenha,
                 controller: _confirmarSenhaController,
-                decoration: _inputDecoration("Confirmar Senha", Icons.lock_reset).copyWith(
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureConfirmarSenha ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.grey,
+                decoration:
+                    _inputDecoration(
+                      "Confirmar Senha",
+                      Icons.lock_reset,
+                    ).copyWith(
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirmarSenha
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () => setState(
+                          () =>
+                              _obscureConfirmarSenha = !_obscureConfirmarSenha,
+                        ),
+                      ),
                     ),
-                    onPressed: () => setState(() => _obscureConfirmarSenha = !_obscureConfirmarSenha),
-                  ),
-                ),
               ),
 
               const SizedBox(height: 50),
 
-              // BOTÃO CADASTRAR
+              //Botão de cadastrar
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -186,7 +191,7 @@ class _CadastroPageState extends State<CadastroPage> {
     );
   }
 
-  // === FUNÇÕES DE LÓGICA E UI ===
+  // FUNÇÕES DE LÓGICA E UI
 
   Future<void> _handleCadastro() async {
     String nome = _nomeController.text.trim();
@@ -234,7 +239,9 @@ class _CadastroPageState extends State<CadastroPage> {
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Widget _buildSectionTitle(String title) {

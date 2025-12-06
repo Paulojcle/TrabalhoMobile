@@ -53,9 +53,7 @@ class _HomePageState extends State<HomePage> {
     return 'R\$ $valorString';
   }
 
-  // =======================================================
-  // 1. MODAL DE NOTIFICAÇÕES (Visual Mantido)
-  // =======================================================
+  // Modal de notificações
   void _openNotificationModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -120,9 +118,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // =======================================================
-  // 2. MODAL DE FILTROS (Visual Mantido)
-  // =======================================================
+  //Filtros
   void _openFilterModal(BuildContext context) {
     int camas = 1;
     int banheiros = 1;
@@ -188,7 +184,6 @@ class _HomePageState extends State<HomePage> {
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
-                        // Aqui você implementaria a lógica de filtrar a lista _quartos
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _primaryColor,
@@ -293,7 +288,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 20),
-            // Barra de Pesquisa
             Container(
               height: 55,
               decoration: BoxDecoration(
@@ -335,7 +329,6 @@ class _HomePageState extends State<HomePage> {
 
             const SizedBox(height: 30),
 
-            // Título Seção
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -359,7 +352,6 @@ class _HomePageState extends State<HomePage> {
 
             const SizedBox(height: 10),
 
-            // Lógica de Exibição da Lista
             if (_isLoading)
               const Center(
                 child: Padding(
@@ -393,7 +385,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               )
             else
-              // LISTA REAL CONECTADA AO DESIGN
               ListView.separated(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
@@ -405,19 +396,14 @@ class _HomePageState extends State<HomePage> {
                   String precoFormatado = _formatarMoeda(quarto.preco);
 
                   return _HotelCard(
-                    // 1. Imagem
-                    imageUrl: (quarto.imageUrl != null && quarto.imageUrl!.isNotEmpty)
+                    imageUrl:
+                        (quarto.imageUrl != null && quarto.imageUrl!.isNotEmpty)
                         ? quarto.imageUrl!
-                        : 'assets/quarto.png', 
-                    // 2. Tipo do Quarto
+                        : 'assets/quarto.png',
                     title: quarto.tipo,
-                    // 3. Avaliação
                     rating: quarto.avaliacao.toString(),
-                    // 4. Capacidade
                     guests: "${quarto.capacidade} Pessoas",
-                    // 5. Camas
                     beds: "${quarto.camas} Camas",
-                    // 6. Preço Formatado
                     price: precoFormatado,
                     primaryColor: _primaryColor,
                     onTap: () {
@@ -443,9 +429,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// =======================================================
-// WIDGETS AUXILIARES (Design Intacto)
-// =======================================================
+// Wigtes auxiliares
 
 class _HotelCard extends StatelessWidget {
   final String imageUrl;

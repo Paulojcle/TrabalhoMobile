@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'fazer_reserva.dart'; 
+import 'fazer_reserva.dart';
 import '../data/reserva_service.dart';
 import '../models/quarto.dart';
-import '../servicos/auth_guard.dart'; 
+import '../servicos/auth_guard.dart';
 
 class DetalhesQuartoPage extends StatefulWidget {
   final Quarto quarto;
   final ReservaService reservaService;
-  
+
   const DetalhesQuartoPage({
     super.key,
     required this.quarto,
@@ -19,10 +19,8 @@ class DetalhesQuartoPage extends StatefulWidget {
 }
 
 class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
-  // Controle do índice da imagem atual
   int _currentImageIndex = 0;
 
-  // Cores do tema
   final Color _primaryColor = const Color(0xFF0B2A4A);
   final Color _backgroundColor = const Color(0xFFF8F9FA);
   final Color _textColor = const Color(0xFF333333);
@@ -32,12 +30,11 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
   @override
   void initState() {
     super.initState();
-    // Prepara a lista de imagens. 
-    // Se a string da imagem vier vazia ou nula, usamos um placeholder para não travar o app.
-    String img = (widget.quarto.imageUrl != null && widget.quarto.imageUrl!.isNotEmpty)
+    String img =
+        (widget.quarto.imageUrl != null && widget.quarto.imageUrl!.isNotEmpty)
         ? widget.quarto.imageUrl!
         : 'https://via.placeholder.com/400x300';
-        
+
     _images = [img];
   }
 
@@ -56,13 +53,11 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
       backgroundColor: _backgroundColor,
       body: Stack(
         children: [
-          // 1. CONTEÚDO COM SCROLL
           SingleChildScrollView(
             padding: const EdgeInsets.only(bottom: 100),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // === CARROSSEL DE IMAGENS ===
                 Stack(
                   children: [
                     SizedBox(
@@ -104,7 +99,6 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       ),
                     ),
 
-                    // Gradiente Base
                     Positioned(
                       bottom: 0,
                       left: 0,
@@ -124,7 +118,6 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       ),
                     ),
 
-                    // Indicador de Páginas (Bolinhas)
                     Positioned(
                       bottom: 20,
                       left: 0,
@@ -148,7 +141,6 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       ),
                     ),
 
-                    // Contador de Fotos
                     Positioned(
                       bottom: 20,
                       right: 20,
@@ -176,19 +168,17 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
 
                 const SizedBox(height: 20),
 
-                // === INFORMAÇÕES DO QUARTO ===
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Título
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Text(
-                              quarto.tipo, // ⬅️ DADO REAL
+                              quarto.tipo,
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
@@ -212,7 +202,7 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            "${quarto.avaliacao} (Classificação)", // ⬅️ DADO REAL
+                            "${quarto.avaliacao} (Classificação)",
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               color: _textColor,
@@ -226,13 +216,12 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       const Divider(height: 1),
                       const SizedBox(height: 25),
 
-                      // Detalhes (Capacidade real, outros fixos)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           _IconDetail(
                             icon: Icons.people_alt_rounded,
-                            label: "${quarto.capacidade} Hóspedes", 
+                            label: "${quarto.capacidade} Hóspedes",
                           ),
                           _IconDetail(
                             icon: Icons.bathtub_outlined,
@@ -248,9 +237,6 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       const SizedBox(height: 25),
                       const Divider(height: 1),
                       const SizedBox(height: 25),
-
-                      // === O QUE ESSE LUGAR OFERECE ===
-                      // (Mantido fixo pois o Model Quarto não tem lista de services ainda)
                       Text(
                         "O que esse lugar oferece",
                         style: TextStyle(
@@ -285,7 +271,6 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       const Divider(height: 1),
                       const SizedBox(height: 25),
 
-                      // === DESCRIÇÃO ===
                       Text(
                         "Sobre a acomodação",
                         style: TextStyle(
@@ -296,7 +281,7 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        quarto.descricao, // ⬅️ DADO REAL
+                        quarto.descricao,
                         style: TextStyle(
                           fontSize: 15,
                           color: Colors.grey[600],
@@ -310,7 +295,6 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
             ),
           ),
 
-          // 2. BOTÕES FLUTUANTES SUPERIORES
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             left: 20,
@@ -326,7 +310,7 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
             ),
           ),
 
-          // 3. RODAPÉ FIXO
+          // RODAPÉ FIXO
           Positioned(
             bottom: 0,
             left: 0,
@@ -351,13 +335,12 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Preço
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          precoFormatado, // ⬅️ DADO REAL
+                          precoFormatado,
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -374,16 +357,14 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
                       ],
                     ),
 
-                    // Botão Reservar
                     ElevatedButton(
                       onPressed: () async {
-                        // Lógica de Autenticação
                         bool isLoggedIn = await requireLogin(context);
-                        
-                        if (!isLoggedIn) return; // Se não logou, para.
+
+                        if (!isLoggedIn) return;
 
                         if (!mounted) return;
-                        
+
                         // Navega para a tela de fazer reserva
                         Navigator.push(
                           context,
@@ -426,9 +407,7 @@ class _DetalhesQuartoPageState extends State<DetalhesQuartoPage> {
   }
 }
 
-// =======================================================
 // WIDGETS AUXILIARES
-// =======================================================
 
 class _CircleButton extends StatelessWidget {
   final IconData icon;

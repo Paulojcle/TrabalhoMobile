@@ -18,7 +18,6 @@ class CancelarReserva extends StatefulWidget {
 class _CancelarReservaState extends State<CancelarReserva> {
   bool _isLoading = false;
 
-  // Cores do tema
   final Color _backgroundColor = const Color(0xFFF8F9FA);
   final Color _textColor = const Color(0xFF333333);
   final Color _dangerColor = Colors.red.shade600;
@@ -31,9 +30,8 @@ class _CancelarReservaState extends State<CancelarReserva> {
 
       if (mounted) {
         // Sucesso: Retorna para a tela inicial limpando a pilha
-        // Isso garante que o usuário não volte para uma tela de detalhes de algo que não existe mais
         Navigator.of(context).popUntil((route) => route.isFirst);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("✅ Reserva cancelada com sucesso!"),
@@ -84,7 +82,6 @@ class _CancelarReservaState extends State<CancelarReserva> {
             children: [
               const Spacer(),
 
-              // 1. ÍCONE DE ALERTA COM FUNDO SUAVE
               Container(
                 padding: const EdgeInsets.all(30),
                 decoration: BoxDecoration(
@@ -97,10 +94,9 @@ class _CancelarReservaState extends State<CancelarReserva> {
                   size: 80,
                 ),
               ),
-              
+
               const SizedBox(height: 30),
 
-              // 2. TEXTOS DE CONFIRMAÇÃO
               Text(
                 "Tem certeza?",
                 style: TextStyle(
@@ -113,16 +109,24 @@ class _CancelarReservaState extends State<CancelarReserva> {
               RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
-                  style: TextStyle(fontSize: 16, color: Colors.grey[600], height: 1.5),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                    height: 1.5,
+                  ),
                   children: [
-                    const TextSpan(text: "Você está prestes a cancelar a reserva\n"),
-                    
-                    // ⚠️ CORREÇÃO AQUI: Removemos o .substring perigoso
-                    TextSpan(
-                      text: "ID: #${widget.reservaID}", 
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+                    const TextSpan(
+                      text: "Você está prestes a cancelar a reserva\n",
                     ),
-                    
+
+                    TextSpan(
+                      text: "ID: #${widget.reservaID}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+
                     const TextSpan(text: ".\nEssa ação é irreversível."),
                   ],
                 ),
@@ -130,7 +134,6 @@ class _CancelarReservaState extends State<CancelarReserva> {
 
               const Spacer(),
 
-              // 3. BOTÕES DE AÇÃO
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -148,7 +151,10 @@ class _CancelarReservaState extends State<CancelarReserva> {
                       ? const SizedBox(
                           height: 25,
                           width: 25,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 3,
+                          ),
                         )
                       : const Text(
                           "Sim, Cancelar Reserva",
@@ -160,7 +166,7 @@ class _CancelarReservaState extends State<CancelarReserva> {
                         ),
                 ),
               ),
-              
+
               const SizedBox(height: 15),
 
               SizedBox(
@@ -183,7 +189,7 @@ class _CancelarReservaState extends State<CancelarReserva> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 20),
             ],
           ),

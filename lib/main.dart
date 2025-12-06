@@ -2,18 +2,15 @@ import 'package:flutter/material.dart';
 import 'splash_screen.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:app_links/app_links.dart'; 
-import 'pages/redefinir_senha.dart'; 
+import 'package:app_links/app_links.dart';
+import 'pages/redefinir_senha.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-// 1. Crie esta chave global fora das classes
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const MyApp());
 }
@@ -47,11 +44,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _processarLink(Uri uri) {
-    // Tenta pegar o código diretamente
     String? oobCode = uri.queryParameters['oobCode'];
 
-    // O Firebase às vezes embrulha o link em um parâmetro 'link'.
-    // Ex: https://seuapp.page.link/?link=https://...?oobCode=XYZ
     if (oobCode == null && uri.queryParameters.containsKey('link')) {
       try {
         final innerUri = Uri.parse(uri.queryParameters['link']!);
@@ -61,9 +55,7 @@ class _MyAppState extends State<MyApp> {
       }
     }
 
-    // Se encontrou o código, navega para a tela de redefinição
     if (oobCode != null) {
-      // Usa a navigatorKey para navegar sem context
       navigatorKey.currentState?.push(
         MaterialPageRoute(
           builder: (_) => RedefinirSenhaPage(oobCode: oobCode!),
@@ -75,22 +67,17 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // 2. Conecte a chave global aqui
       navigatorKey: navigatorKey,
-      
+
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
-      
-      // === CONFIGURAÇÃO DE IDIOMA E LOCALIZAÇÃO ===
+
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('pt', 'BR'), // Português Brasil
-        Locale('en', 'US'), // Inglês (opcional)
-      ],
+      supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
       theme: ThemeData(
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.white,

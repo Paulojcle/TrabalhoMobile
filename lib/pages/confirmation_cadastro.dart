@@ -13,57 +13,48 @@ class ConfirmacaoCadastro extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
           child: Column(
             children: [
-              
-              // Empurra o conteúdo para o centro
-              const Spacer(), 
+              const Spacer(),
 
-              // --- ÁREA DE SUCESSO ---
               Column(
                 children: [
-                  // Ícone com fundo circular (Estilo moderno)
                   Container(
                     padding: const EdgeInsets.all(30),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1), // Fundo verde bem clarinho
+                      color: Colors.green.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.check_rounded,
                       color: Colors.green,
-                      size: 100, // Tamanho equilibrado
+                      size: 100,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 40),
-                  
+
                   const Text(
                     'Tudo pronto!',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF0B2A4A), // Cor da marca
+                      color: Color(0xFF0B2A4A),
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  
+
                   const SizedBox(height: 15),
-                  
+
                   const Text(
                     'Seu cadastro foi realizado com sucesso.\nAgora você pode aproveitar o SleepWell.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey, // Texto secundário mais suave
-                      height: 1.5, // Espaçamento entre linhas
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
                 ],
               ),
 
               // Empurra o botão para o final
-              const Spacer(), 
+              const Spacer(),
 
-              // --- BOTÃO DE AÇÃO ---
               SizedBox(
                 width: double.infinity,
                 height: 60,
@@ -79,10 +70,10 @@ class ConfirmacaoCadastro extends StatelessWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0B2A4A),
-                    elevation: 5, // Sombra sutil
+                    elevation: 5,
                     shadowColor: const Color(0xFF0B2A4A).withOpacity(0.4),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20), // Bordas modernas
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                   child: const Text(
@@ -95,8 +86,8 @@ class ConfirmacaoCadastro extends StatelessWidget {
                   ),
                 ),
               ),
-              
-              const SizedBox(height: 20), // Margem inferior extra
+
+              const SizedBox(height: 20),
             ],
           ),
         ),
