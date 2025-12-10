@@ -22,3 +22,13 @@
 
 ## 🎥 Vídeo Explicativo (O vídeo mostra a integração das aplicações através da API)
 🔗 [https://drive.google.com/file/d/1H5AKgSXdZShw7IbLCH12QWZxhTfAJNNf/view?usp=classroom_web&authuser=1](https://drive.google.com/file/d/1H5AKgSXdZShw7IbLCH12QWZxhTfAJNNf/view?usp=classroom_web&authuser=1)
+
+## Link do Figma com os protótipos iniciais (foram remodelados de acordo com o desenvolvimento das telas)
+🔗 [https://www.figma.com/design/QPbqBPNbZOV3ZC5KObWQaB/Projeto-Mobile?node-id=0-1&t=501JLSKxiM6LAYlp-1](https://www.figma.com/design/QPbqBPNbZOV3ZC5KObWQaB/Projeto-Mobile?node-id=0-1&t=501JLSKxiM6LAYlp-1)
+
+## Link do Canva com o slide da apresentação de mobilde realizada no dia 10/12
+🔗 [https://www.canva.com/design/DAG30gUaSKU/R95gd3CCR6la4lSC9ZQEfw/edit?utm_content=DAG30gUaSKU&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton](https://www.canva.com/design/DAG30gUaSKU/R95gd3CCR6la4lSC9ZQEfw/edit?utm_content=DAG30gUaSKU&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+
+## Link do documento de requisitos do sistema mobile
+🔗 [https://docs.google.com/document/d/1ShnU4Rl2fOxuECnMiXijHQzSlijvLH68PvyU-qZUdAk/edit?usp=sharing](https://docs.google.com/document/d/1ShnU4Rl2fOxuECnMiXijHQzSlijvLH68PvyU-qZUdAk/edit?usp=sharing)
+
